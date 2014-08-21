@@ -25,13 +25,22 @@ import scala.util.control.Breaks._
 
 object LogEvaluator {
 
+  /*
+   * A set of indicators to specified whether a certain conversion goal 
+   * has been achieved or not
+   */
+  val FLOW_NOT_ENTERED = 0  
+  val FLOW_ENTERED     = 1
+  val FLOW_COMPLETED   = 2
+
   /**
-   * This method determines the time spent on a certain page in seconds and assigns 
-   * a specific rating from a predefined time rating (see configuration)
+   * This method is directly applied to the extraction result; it specifies a first aggregation 
+   * step for the raw click data and determines the time spent on a certain page in seconds, and 
+   * assigns a specific rating from a predefined time rating (see configuration)
    * 
    * Input: session = (sessionid,timestamp,userid,pageurl,visittime,referrer)
    */
-  def timeSpentAndRating(source:RDD[(String,Long,String,String,String,String)]):RDD[String] = {
+  def eval1(source:RDD[(String,Long,String,String,String,String)]):RDD[String] = {
 
     val sc = source.context
     val ratings = sc.broadcast(Configuration.ratings)
@@ -109,5 +118,124 @@ object LogEvaluator {
     })
      
   }
+  /**
+   * This method is directly applied to the extraction result; it specifies another aggregation 
+   * step for the raw click data 
+   * 
+   * Sample evaluation:
+   * 
+   * Checkout abandonment is an important metric. It’s the ratio of the number of sessions 
+   * that abandoned a checkout process and the total number of sessions that entered the 
+   * checkout process.
+   * 
+   * Although the focus is on conversion, some other important and insightful metrics 
+   * can be derived. Here are some further examples:  
+   * 
+   * - Bounce rate, i.e., number of sessions that end after the landing page
+   * - Average session duration
+   * - Site penetration i.e., average number of pages visited per session 
+   * - User visit time distribution in a 24 hour period 
+   *
+   * - Conversion rate i.e., percentage of unique users converting
+   * - Average number of visits before conversion
+   * - Average number of visits per month
+   * - Average time gap between visits, which is indicative of customer loyalty
+   * - Average number of purchases per year, which is also a good metric for customer loyalty
+   * - Average time gap between purchases
+   * 
+   * 
+   * Input: session = (sessionID,timestamp,userID,pageURL,visitTime,referrer)
+   * 
+   */
+  def eval2(source:RDD[(String,Long,String,String,String,String)],flow:Array[String]):RDD[(String,String,Int,Long,Long,String,String,Int)] = {
  
+    /* Group source by sessionid */
+    val dataset = source.groupBy(group => group._1)
+    dataset.map(valu => {
+      
+      /* Sort session data by timestamp */
+      val data = valu._2.toList.sortBy(_._2)
+
+      val pages = ArrayBuffer.empty[String]
+
+      var sessid:String = null
+      var userid:String = null
+      
+      var lasturl:String  = null
+      var referrer:String = null
+      
+      var starttime:Long = 0
+      var endtime:Long   = 0
+      
+      var visittime:String = null
+      
+      var first = true
+      for (entry <- data) {
+
+        if (first) {
+          
+          var (sessid,starttime,userid,lasturl,visittime,referrer) = entry         
+          first = false
+          
+        } else {
+
+          endtime = entry._2
+          
+        }
+          
+        pages += entry._4
+       
+      }
+      
+      /* Total number of page clicks */
+      val total = pages.size
+      
+      /* Total time spent for session */
+      val timespent = (if (total > 1) (endtime - starttime) / 1000 else 0)
+      val exiturl = pages(total - 1)
+      
+      /*
+       * This is a simple session evaluation to determine whether the sequence of
+       * pages per session matches with a predefined page flow
+       */
+      val flowstatus = checkFlow(pages)      
+      (sessid,userid,total,starttime,timespent,referrer,exiturl,flowstatus)
+      
+    })
+    
+  }
+
+  private def checkFlow(pages:ArrayBuffer[String]):Int = { 			
+    		
+    val FLOW = Configuration.flow
+    var j = 0
+    var	flowStat = FLOW_NOT_ENTERED
+    		
+    var matched = false;
+    		
+    for (i <- 0 until FLOW.length) {
+    			
+      breakable {while (j < pages.size) {
+    				
+        matched = false
+        /*
+         * We expect that a certain page url has to start with the 
+         * configured url part of the flow
+         */
+    	if (pages(j).startsWith(FLOW(i))) {
+    	  flowStat = (if (i == FLOW.length - 1) FLOW_COMPLETED else FLOW_ENTERED)
+    	  matched = true
+    				
+    	}
+    	j += 1
+    	if (matched) break
+    			
+      }}
+    
+    }
+
+    flowStat
+    
+  }
+
 }

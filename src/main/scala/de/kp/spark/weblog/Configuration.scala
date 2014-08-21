@@ -44,6 +44,8 @@ object Configuration {
   val FIELD_USERID    = "user.id.name"
 
   val COOKIE_DELIMITER = "cookie.delim"
+  
+  val FLOW_SEQUENCE = "flow.sequence"
     
   val PAGE_RATING = "pagetime.rating"
     
@@ -73,7 +75,7 @@ object Configuration {
       /*
        * Conversion indicator
        */
-      "flow.sequence" -> conf.getString("flow.sequence")
+      FLOW_SEQUENCE -> conf.getString(FLOW_SEQUENCE)
     )
     
   }
@@ -93,6 +95,8 @@ object Configuration {
     }).toMap
     
   }
+
+  def flow = settings(FLOW_SEQUENCE).split(",")
   
   def ratings:Map[Int,Int] = {
     
