@@ -45,6 +45,8 @@ object Configuration {
 
   val COOKIE_DELIMITER = "cookie.delim"
     
+  val PAGE_RATING = "pagetime.rating"
+    
   private val path = "application.conf"
   private val conf = ConfigFactory.load(path).getConfig("log")
 
@@ -65,6 +67,9 @@ object Configuration {
       
       FIELD_USERID -> conf.getString(FIELD_USERID),
       COOKIE_DELIMITER -> conf.getString(COOKIE_DELIMITER),
+      
+      PAGE_RATING -> conf.getString(PAGE_RATING),
+      
       /*
        * Conversion indicator
        */
@@ -87,6 +92,17 @@ object Configuration {
     
     }).toMap
     
+  }
+  
+  def ratings:Map[Int,Int] = {
+    
+    settings(PAGE_RATING).split(";").map(valu => {
+      
+      val Array(timespent,rating) = valu.split(":")
+      (timespent.toInt,rating.toInt)
+    
+    }).toMap
+
   }
   
   def config:Map[String,String] = settings
