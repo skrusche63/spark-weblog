@@ -18,13 +18,33 @@ package de.kp.spark.weblog
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-import java.util.regex.{Matcher,Pattern}
+import java.text.SimpleDateFormat
 
 import com.typesafe.config.ConfigFactory
 import scala.collection.mutable.HashMap
 
 object Configuration {
 
+  val FIELD_DELIMITER = "field.delim"
+  val FIELD_METADATA  = "field.meta"
+  
+  /*
+   * Field names 
+   */
+  val FIELD_COOKIE   = "cookie"  
+  val FIELD_DATE     = "date"  
+  val FIELD_REFERRER = "referrer"    
+  val FIELD_TIME     = "time"  
+  val FIELD_URL      = "url"  
+  
+  /*
+   * Specific field names
+   */  
+  val FIELD_SESSIONID = "session.id.name"
+  val FIELD_USERID    = "user.id.name"
+
+  val COOKIE_DELIMITER = "cookie.delim"
+    
   private val path = "application.conf"
   private val conf = ConfigFactory.load(path).getConfig("log")
 
@@ -36,15 +56,15 @@ object Configuration {
       /*
        * Main settings to split a log line into a set of fields
        */
-      "field.delim" -> conf.getString("field.delim"),
-      "field.meta"   -> conf.getString("field.meta"),
+      FIELD_DELIMITER -> conf.getString(FIELD_DELIMITER),
+      FIELD_METADATA  -> conf.getString(FIELD_METADATA),
       /*
        * Specific field evaluation
        */
-      "session.id.name" -> conf.getString("session.id.name"),
+      FIELD_SESSIONID -> conf.getString(FIELD_SESSIONID),
       
-      "user.id.name" -> conf.getString("user.id.name"),
-      "cookie.separator" -> conf.getString("cookie.separator"),
+      FIELD_USERID -> conf.getString(FIELD_USERID),
+      COOKIE_DELIMITER -> conf.getString(COOKIE_DELIMITER),
       /*
        * Conversion indicator
        */
@@ -52,7 +72,31 @@ object Configuration {
     )
     
   }
+
+  /*
+   * Data format
+   */
+  def dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
+  def fieldspec:Map[String,Int] = {
+    
+    settings(FIELD_METADATA).split(";").map(valu => {
+      
+      val Array(name,pos) = valu.split(":")
+      (name,pos.toInt)
+    
+    }).toMap
+    
+  }
   
-  def get:Map[String,String] = settings
+  def config:Map[String,String] = settings
+
+  def COOKIE_DELIM = settings(COOKIE_DELIMITER)
+  
+  def FIELD_DELIM  = settings(FIELD_DELIMITER)
+
+  def SESSION_ID_NAME = settings(FIELD_SESSIONID)
+  
+  def USER_ID_NAME    = settings(FIELD_USERID)
 
 }
