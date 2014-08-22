@@ -25,7 +25,7 @@ import de.kp.spark.weblog.Configuration._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 
-object LogEvaluator {
+object LogEvaluator extends Serializable {
 
   /**
    * This method is directly applied to the extraction result (see LogExtactor); 
@@ -117,32 +117,10 @@ object LogEvaluator {
    * This method is directly applied to the extraction result (see LogExtractor); 
    * it specifies another aggregation step for the raw click data 
    * 
-   * Sample evaluation:
-   * 
-   * Checkout abandonment is an important metric. It’s the ratio of the number of sessions 
-   * that abandoned a checkout process and the total number of sessions that entered the 
-   * checkout process.
-   * 
-   * Although the focus is on conversion, some other important and insightful metrics 
-   * can be derived. Here are some further examples:  
-   * 
-   * - Bounce rate, i.e., number of sessions that end after the landing page
-   * - Average session duration
-   * - Site penetration i.e., average number of pages visited per session 
-   * - User visit time distribution in a 24 hour period 
-   *
-   * - Conversion rate i.e., percentage of unique users converting
-   * - Average number of visits before conversion
-   * - Average number of visits per month
-   * - Average time gap between visits, which is indicative of customer loyalty
-   * - Average number of purchases per year, which is also a good metric for customer loyalty
-   * - Average time gap between purchases
-   * 
-   * 
    * Input: session = (sessionid,timestamp,userid,pageurl,visittime,referrer)
    * 
    */
-  def eval2(source:RDD[(String,Long,String,String,String,String)],flow:Array[String]):RDD[(String,String,Int,Long,Long,String,String,Int)] = {
+  def eval2(source:RDD[(String,Long,String,String,String,String)]):RDD[(String,String,Int,Long,Long,String,String,Int)] = {
  
     /* Group source by sessionid */
     val dataset = source.groupBy(group => group._1)
@@ -203,6 +181,27 @@ object LogEvaluator {
   /**
    * This method is applied to the results from 'eval2'; it specifies a second level 
    * aggregation for the raw click data
+   * 
+   * Sample evaluation:
+   * 
+   * Checkout abandonment is an important metric. It’s the ratio of the number of sessions 
+   * that abandoned a checkout process and the total number of sessions that entered the 
+   * checkout process.
+   * 
+   * Although the focus is on conversion, some other important and insightful metrics 
+   * can be derived. Here are some further examples:  
+   * 
+   * - Bounce rate, i.e., number of sessions that end after the landing page
+   * - Average session duration
+   * - Site penetration i.e., average number of pages visited per session 
+   * - User visit time distribution in a 24 hour period 
+   *
+   * - Conversion rate i.e., percentage of unique users converting
+   * - Average number of visits before conversion
+   * - Average number of visits per month
+   * - Average time gap between visits, which is indicative of customer loyalty
+   * - Average number of purchases per year, which is also a good metric for customer loyalty
+   * - Average time gap between purchases
    * 
    * Input: (sessionid,userid,total,starttime,timespent,referrer,exiturl,flowstatus)
    * 

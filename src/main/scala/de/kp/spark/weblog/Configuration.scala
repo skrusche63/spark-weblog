@@ -95,7 +95,7 @@ object Configuration {
 
   def fieldspec:Map[String,Int] = {
     
-    settings(FIELD_METADATA).split(";").map(valu => {
+    settings(FIELD_METADATA).split(",").map(valu => {
       
       val Array(name,pos) = valu.split(":")
       (name,pos.toInt)
@@ -108,7 +108,7 @@ object Configuration {
   
   def ratings:Map[Int,Int] = {
     
-    settings(PAGE_RATING).split(";").map(valu => {
+    settings(PAGE_RATING).split(",").map(valu => {
       
       val Array(timespent,rating) = valu.split(":")
       (timespent.toInt,rating.toInt)
