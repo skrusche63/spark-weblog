@@ -48,6 +48,6 @@ object WebLogMiner extends SparkApp {
      */
     val pages = LogEvaluator.eval1(sessions)
     pages.map(p => LogModel.serializePage(p)).saveAsTextFile(path + "pages")
-
+    
   }
 }
