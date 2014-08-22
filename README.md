@@ -24,12 +24,9 @@ DJ4XNH6EMMW5CCC5,3GQ426510U4H,1335478060000,/addToCart/NL0ZJO2L,00:09:31,http://
 X6DUSPR2R53VZ53G,2XXW0J4N117Q,1335478101000,/product/FPR477BM,00:08:21,http://www.google.com,74,6
 X6DUSPR2R53VZ53G,2XXW0J4N117Q,1335478101000,/addToCart/FPR477BM,00:09:35,http://www.google.com,0,0
 C142FL33KKCV603E,UJAQ1TQWAGVL,1335478185000,/product/7Y4FP655,00:09:45,http://www.twitter.com,0,0
-
 ```
 
-
-
-The code example illustrates how a distributed in-memory data structure (RDD) may be queried with an SQL statement (query). The statement may be of the form: `select * from pages where rating > 1`.
+The code example illustrates how this distributed in-memory data structure (RDD) may be queried with an SQL statement (query). The statement may be of the form: `select * from pages where rating > 1`.
 ```
 def fromPages(sc:SparkContext,source:RDD[LogPage],query:String):SchemaRDD = {
     
