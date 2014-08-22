@@ -119,8 +119,8 @@ object LogEvaluator {
      
   }
   /**
-   * This method is directly applied to the extraction result; it specifies another aggregation 
-   * step for the raw click data 
+   * This method is directly applied to the extraction result (see LogExtractor); 
+   * it specifies another aggregation step for the raw click data 
    * 
    * Sample evaluation:
    * 
@@ -153,7 +153,7 @@ object LogEvaluator {
     val dataset = source.groupBy(group => group._1)
     dataset.map(valu => {
       
-      /* Sort session data by timestamp */
+      /* Sort single session data by timestamp */
       val data = valu._2.toList.sortBy(_._2)
 
       val pages = ArrayBuffer.empty[String]
@@ -204,7 +204,152 @@ object LogEvaluator {
     })
     
   }
+  
+  /**
+   * This method is applied to the results from 'eval2'; it specifies a second level 
+   * aggregation for the raw click data
+   * 
+   * Input: (sessionid,userid,total,starttime,timespent,referrer,exiturl,flowstatus)
+   * 
+   */
+  def eval3(source:RDD[(String,String,Int,Long,Long,String,String,Int)]):RDD[String] = {
+    
+    /* Group 'eval'2 results by userid */
+    val dataset = source.groupBy(_._2)
+    dataset.map(valu => {
+      
+      /* Sort all user session data by timestamp */
+      val data = valu._2.toList.sortBy(_._2)
+      
+      var userid:String   = null
+      var referrer:String = null
 
+      /*
+       * The total number of session by a certain user
+       * and also the number of session until conversion
+       */
+      var count = 0
+      /*
+       * This value determines the number of sessions
+       * before conversion or purchase
+       */
+      var countToConversion = ArrayBuffer.empty[Int]
+      /*
+       * The total number of pages clicked in all
+       * sessions of a certain user; this value
+       * is used to compute the average number of
+       * page
+       */
+      var totalPages = 0
+      /*
+       * The total time the user spent on a website
+       * with respect to all his or her sessions; this
+       * value is used to compute the average session
+       * time  
+       */
+      var totalTimespent:Long = 0      
+      /*
+       * Starttime of a session, is used to determine
+       * the time in between two subsequent sessions
+       */
+      var starttime:Long = 0      
+      var totalInBetweenTime:Long = 0
+      
+      var lastConversionTime:Long = 0
+      var totalInBetweenConversionTime:Long = 0
+      
+      /*
+       * The sequence of session stati of all user
+       * sessions
+       */
+      var stati = ArrayBuffer.empty[Int]
+      var first = true
+      /**
+       * Go through all sessions per user
+       */
+      for (entry <- data) {
+        
+        if (first) {
+          
+          userid   = entry._2          
+          referrer = entry._6
+          
+          starttime = entry._4
+        				
+          first = false
+         
+        }
+
+        totalPages += entry._3
+        totalTimespent  += entry._5
+        			
+        totalInBetweenTime += (entry._4 - starttime)
+       	starttime = entry._4
+       			    
+       	count += 1
+        			
+       	stati += entry._8
+        if (entry._8 == FLOW_COMPLETED ) {
+          /*
+           * Gather data to determine average
+           * number of visits before conversion
+           */
+          if (countToConversion.isEmpty) {
+            countToConversion += count
+            
+          } else {
+            
+            val last = countToConversion.size - 1
+            countToConversion += (count - countToConversion(last))
+          }
+        
+          /*
+           * Gather data to determine average time
+           * gap between conversion
+           */
+          totalInBetweenConversionTime += (entry._4 - lastConversionTime)
+          lastConversionTime = entry._4
+          
+        }
+        
+      }
+
+      /*
+       * The average number of pages visited per session
+       * specifies the 'site penetration'
+       */      
+      val avNumPages  = Math.round(totalPages.toDouble / count)
+      /*
+       * The average session duration
+       */
+      val avTimespent = Math.round(totalTimespent.toDouble / count)
+      /*
+       * The average time gap between sessions or visits; 
+       * this is an indicative value for customer loyalty
+       */
+      val avInBetweenTime = (if (count > 1) Math.round(totalInBetweenTime.toDouble / (count -1)) else 0)
+      /*
+       * The average number of visits before conversion
+       */
+      val avNumConversion = if (countToConversion.size > 0) Math.round(countToConversion.sum.toDouble / countToConversion.size) else 0
+      /*
+       * The average time gab in between conversions
+       */
+      val avInBetweenConnversionTime  = if (countToConversion.size > 0) Math.round(totalInBetweenConversionTime.toDouble / countToConversion.size) else 0
+      
+      
+      val out = userid + "|" + referrer + "|" + count + "|" + avNumPages + "|" + avTimespent + "|" + avInBetweenTime  + "|" + avNumConversion + "|" + avInBetweenConnversionTime + "|" + stati.mkString(",")
+      out
+      
+    })
+        
+  }
+  
+  /**
+   * A helper method to evaluate whether the pages clicked in a certain 
+   * session match, partially match or do not match a predefined sequence
+   * of page flows
+   */
   private def checkFlow(pages:ArrayBuffer[String]):Int = { 			
     		
     val FLOW = Configuration.flow
