@@ -7,10 +7,14 @@ object WebLogInsight extends SparkApp {
   def main(args:Array[String]) {
     
     val sc = createLocalCtx("WebLogInsight")
-
+    
     val path = "/Work/tmp/web-log/"
-    LogInsight.fromPages(sc, path + "pages", "select * from pages")
+    val rows = LogInsight.fromPages(sc, path + "pages", "select * from pages")
   
+    rows .foreach(r => println(r))
+    
+    sc.stop()
+    
   }
 
 }

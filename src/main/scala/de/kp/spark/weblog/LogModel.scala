@@ -24,6 +24,17 @@ import org.json4s.native.Serialization
 import org.json4s.native.Serialization.{read,write}
 
 /**
+ * A task to extract relevant web page based information
+ * from the web server log file
+ */
+case class PageMiningTask(
+  /*
+   * Name of web server log file
+   */
+  filename:String
+)
+
+/**
  * LogPage specifies a certain page url within a user session
  */
 case class LogPage(
@@ -37,6 +48,10 @@ case class LogPage(
   rating:Int
 )
 
+/**
+ * LogModel holds utility methods with respect
+ * to extracted web log information
+ */
 object LogModel {
     
   implicit val formats = Serialization.formats(NoTypeHints)

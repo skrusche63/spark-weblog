@@ -18,7 +18,10 @@ package de.kp.spark.weblog.sample
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-import de.kp.spark.weblog.{LogExtractor,LogEvaluator,LogModel}
+import org.apache.hadoop.fs.{FileSystem,Path}
+import org.apache.hadoop.conf.{Configuration => HadoopConf}
+
+import de.kp.spark.weblog.{Configuration,LogExtractor,LogEvaluator,LogModel}
 
 /**
  * The WebLogMiner performs a sequence of data mining task
@@ -33,12 +36,12 @@ object WebLogMiner extends SparkApp {
      * Directory on the file system to read
      * and write from during the mining tasks
      */
-    val path = "/Work/tmp/web-log/"
+    val logfile = Configuration.MINING_DIR + "w3logfile.txt"
     /*
      * Preparation step to extract configured data fields
      * from a web log file and return in a structured way
      */
-    val sessions = LogExtractor.extract(sc, path + "w3logfile.txt")
+    val sessions = LogExtractor.extract(sc, logfile)
     /*
      * Mining #1: Compute time spent on each page within a session
      * and rate these pages with respect to the time spent.
@@ -46,8 +49,13 @@ object WebLogMiner extends SparkApp {
      * This is an individual mining tasks that has no successor;
      * therefore all the data stored in the file system
      */
+    val pagefile = (Configuration.MINING_DIR + "pages")
+      
+    val fs = FileSystem.get(new HadoopConf())      
+    fs.delete(new Path(pagefile), true)     
+    
     val pages = LogEvaluator.eval1(sessions)
-    pages.map(p => LogModel.serializePage(p)).saveAsTextFile(path + "pages")
+    pages.map(p => LogModel.serializePage(p)).saveAsTextFile(pagefile)
     
   }
 }

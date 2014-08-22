@@ -37,8 +37,7 @@ object LogInsight {
     val pages = sqlc.jsonFile(path)
     pages.registerAsTable("pages")
 
-    val rows = sqlc.sql(query)    
-    rows
+    sqlc.sql(query)    
     
   }
 
@@ -52,8 +51,7 @@ object LogInsight {
     
     val pages = sqlc.registerRDDAsTable(schema, "pages")
 
-    val rows = sqlc.sql(query)    
-    rows
+    sqlc.sql(query)    
     
   }
   

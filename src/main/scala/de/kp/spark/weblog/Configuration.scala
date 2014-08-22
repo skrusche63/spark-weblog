@@ -25,6 +25,9 @@ import scala.collection.mutable.HashMap
 
 object Configuration {
 
+  /*
+   * LOG FILE CONFIGURATION
+   */
   val FIELD_DELIMITER = "field.delim"
   val FIELD_METADATA  = "field.meta"
   
@@ -57,37 +60,51 @@ object Configuration {
   val FLOW_ENTERED     = 1
   val FLOW_COMPLETED   = 2
     
+  /*
+   * MINING CONFIGURATION
+   */
+  val MINING_PATH = "path"
+  
+  
   private val path = "application.conf"
-  private val conf = ConfigFactory.load(path).getConfig("log")
+    
+  private val logfileCfg = ConfigFactory.load(path).getConfig("logfile")
+  private val miningCfg  = ConfigFactory.load(path).getConfig("mining")
 
-  private val settings = fromConf()
+  private val logfileProps = fromLogfileCfg()
+  private val miningProps  = fromMiningCfg()
 
-  private def fromConf(): Map[String,String] = {
+  private def fromLogfileCfg(): Map[String,String] = {
   
     Map(
       /*
        * Main settings to split a log line into a set of fields
        */
-      FIELD_DELIMITER -> conf.getString(FIELD_DELIMITER),
-      FIELD_METADATA  -> conf.getString(FIELD_METADATA),
+      FIELD_DELIMITER -> logfileCfg.getString(FIELD_DELIMITER),
+      FIELD_METADATA  -> logfileCfg.getString(FIELD_METADATA),
       /*
        * Specific field evaluation
        */
-      FIELD_SESSIONID -> conf.getString(FIELD_SESSIONID),
+      FIELD_SESSIONID -> logfileCfg.getString(FIELD_SESSIONID),
       
-      FIELD_USERID -> conf.getString(FIELD_USERID),
-      COOKIE_DELIMITER -> conf.getString(COOKIE_DELIMITER),
+      FIELD_USERID -> logfileCfg.getString(FIELD_USERID),
+      COOKIE_DELIMITER -> logfileCfg.getString(COOKIE_DELIMITER),
       
-      PAGE_RATING -> conf.getString(PAGE_RATING),
+      PAGE_RATING -> logfileCfg.getString(PAGE_RATING),
       
       /*
        * Conversion indicator
        */
-      FLOW_SEQUENCE -> conf.getString(FLOW_SEQUENCE)
+      FLOW_SEQUENCE -> logfileCfg.getString(FLOW_SEQUENCE)
     )
     
   }
 
+  private def fromMiningCfg(): Map[String,String] = {
+    Map(
+      MINING_PATH -> miningCfg.getString(MINING_PATH)
+    )
+  }
   /*
    * Data format
    */
@@ -95,7 +112,7 @@ object Configuration {
 
   def fieldspec:Map[String,Int] = {
     
-    settings(FIELD_METADATA).split(",").map(valu => {
+    logfileProps(FIELD_METADATA).split(",").map(valu => {
       
       val Array(name,pos) = valu.split(":")
       (name,pos.toInt)
@@ -104,11 +121,11 @@ object Configuration {
     
   }
 
-  def flow = settings(FLOW_SEQUENCE).split(",")
+  def flow = logfileProps(FLOW_SEQUENCE).split(",")
   
   def ratings:Map[Int,Int] = {
     
-    settings(PAGE_RATING).split(",").map(valu => {
+    logfileProps(PAGE_RATING).split(",").map(valu => {
       
       val Array(timespent,rating) = valu.split(":")
       (timespent.toInt,rating.toInt)
@@ -117,14 +134,20 @@ object Configuration {
 
   }
   
-  def config:Map[String,String] = settings
+  def config:Map[String,String] = logfileProps
 
-  def COOKIE_DELIM = settings(COOKIE_DELIMITER)
+  def COOKIE_DELIM = logfileProps(COOKIE_DELIMITER)
   
-  def FIELD_DELIM  = settings(FIELD_DELIMITER)
+  def FIELD_DELIM  = logfileProps(FIELD_DELIMITER)
 
-  def SESSION_ID_NAME = settings(FIELD_SESSIONID)
+  def SESSION_ID_NAME = logfileProps(FIELD_SESSIONID)
   
-  def USER_ID_NAME    = settings(FIELD_USERID)
+  def USER_ID_NAME = logfileProps(FIELD_USERID)
 
+  /*
+   * Returns the specified directory on the file system
+   * where to read and write mining results
+   */
+  def MINING_DIR = miningProps(MINING_PATH)
+  
 }
