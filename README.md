@@ -8,13 +8,13 @@ Web Log Mining is used here to extract common web analytic parameters.
 
 ---
 
-### Web Log Insights with SparkSQL
+### Insights from Web Logs
 
 Checkout abandonment is of interest to any online retailer. We show how to determine abandoned checkouts from W3C web server logs with just a few lines of Scala code by using the functionality of Spark and SparkSQL.
 
 ---
 
-### Web Log Predictions with Spark
+### Predictions from Web Logs
 
 Visitor conversion is the main topic for any ecommerce website, as conversion (usually) means purchasing a product or service. Conversion could also mean that the visitors takes a certain action, such as registrating for an email news letter or any other action the retailer benefits from.
 
