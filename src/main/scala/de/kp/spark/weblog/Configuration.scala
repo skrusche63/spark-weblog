@@ -48,6 +48,14 @@ object Configuration {
   val FLOW_SEQUENCE = "flow.sequence"
     
   val PAGE_RATING = "pagetime.rating"
+
+  /*
+   * A set of indicators to specified whether 
+   * a certain conversion has been achieved
+   */
+  val FLOW_NOT_ENTERED = 0  
+  val FLOW_ENTERED     = 1
+  val FLOW_COMPLETED   = 2
     
   private val path = "application.conf"
   private val conf = ConfigFactory.load(path).getConfig("log")

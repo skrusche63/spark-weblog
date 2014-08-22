@@ -20,23 +20,18 @@ package de.kp.spark.weblog
 
 import org.apache.spark.rdd.RDD
 
+import de.kp.spark.weblog.Configuration._
+
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 
 object LogEvaluator {
 
-  /*
-   * A set of indicators to specified whether a certain conversion goal 
-   * has been achieved or not
-   */
-  val FLOW_NOT_ENTERED = 0  
-  val FLOW_ENTERED     = 1
-  val FLOW_COMPLETED   = 2
-
   /**
-   * This method is directly applied to the extraction result; it specifies a first aggregation 
-   * step for the raw click data and determines the time spent on a certain page in seconds, and 
-   * assigns a specific rating from a predefined time rating (see configuration)
+   * This method is directly applied to the extraction result (see LogExtactor); 
+   * it specifies a first level aggregation of raw click data and determines the 
+   * time spent on a certain page in seconds, and assigns a specific rating from 
+   * a predefined time rating (see configuration)
    * 
    * Input: session = (sessionid,timestamp,userid,pageurl,visittime,referrer)
    */
@@ -144,7 +139,7 @@ object LogEvaluator {
    * - Average time gap between purchases
    * 
    * 
-   * Input: session = (sessionID,timestamp,userID,pageURL,visitTime,referrer)
+   * Input: session = (sessionid,timestamp,userid,pageurl,visittime,referrer)
    * 
    */
   def eval2(source:RDD[(String,Long,String,String,String,String)],flow:Array[String]):RDD[(String,String,Int,Long,Long,String,String,Int)] = {
