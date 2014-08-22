@@ -12,6 +12,23 @@ Web Log Mining is used here to extract common web analytic parameters.
 
 Checkout abandonment is of interest to any online retailer. We show how to determine abandoned checkouts from W3C web server logs with just a few lines of Scala code by using the functionality of Spark and Spark SQL.
 
+The following data describe the result of a simple data mining task:
+
+```
+sessionid | userid | timestamp | pageurl | visittime | referrer | timespent | rating
+------------------------------------------------------------------------------------
+
+DJ4XNH6EMMW5CCC5,3GQ426510U4H,1335478060000,/product/N19C4MX1,00:07:40,http://www.healthyshopping.com/product/T0YJZ1QH,44,6
+LogPage(DJ4XNH6EMMW5CCC5,3GQ426510U4H,1335478060000,/product/NL0ZJO2L,00:08:24,http://www.healthyshopping.com/product/T0YJZ1QH,67,6)
+LogPage(DJ4XNH6EMMW5CCC5,3GQ426510U4H,1335478060000,/addToCart/NL0ZJO2L,00:09:31,http://www.healthyshopping.com/product/T0YJZ1QH,0,0)
+LogPage(X6DUSPR2R53VZ53G,2XXW0J4N117Q,1335478101000,/product/FPR477BM,00:08:21,http://www.google.com,74,6)
+LogPage(X6DUSPR2R53VZ53G,2XXW0J4N117Q,1335478101000,/addToCart/FPR477BM,00:09:35,http://www.google.com,0,0)
+LogPage(C142FL33KKCV603E,UJAQ1TQWAGVL,1335478185000,/product/7Y4FP655,00:09:45,http://www.twitter.com,0,0)
+
+```
+
+
+
 The code example illustrates how a distributed in-memory data structure (RDD) may be queried with an SQL statement (query). The statement may be of the form: `select * from pages where rating > 1`.
 ```
 def fromPages(sc:SparkContext,source:RDD[LogPage],query:String):SchemaRDD = {
