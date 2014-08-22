@@ -37,7 +37,7 @@ object LogExtractor extends Serializable {
    * This is the basic method to extract valuable information from the entries of the W3 log file
    */
   def extract(sc:SparkContext,path:String):RDD[(String,Long,String,String,String,String)] = {
-    
+
     sc.textFile(path).map(line => {
       
       val items = line.split(FIELD_DELIM)
@@ -52,7 +52,6 @@ object LogExtractor extends Serializable {
        * __RequestVerificationToken_Lw__=3GQ426510U4H;+.ASPXAUTH=DJ4XNH6EMMW5CCC5
        */
       val citems = items(fieldspec(FIELD_COOKIE)).split(COOKIE_DELIM)
-   
       val sessionid = citems.filter(cookieItem => cookieItem.startsWith(SESSION_ID_NAME))
           .map(cookieItem => cookieItem.split("=")(1)).head
 

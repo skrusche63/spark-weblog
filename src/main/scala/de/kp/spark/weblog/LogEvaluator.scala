@@ -35,7 +35,7 @@ object LogEvaluator extends Serializable {
    * 
    * Input: session = (sessionid,timestamp,userid,pageurl,visittime,referrer)
    */
-  def eval1(source:RDD[(String,Long,String,String,String,String)]):RDD[String] = {
+  def eval1(source:RDD[(String,Long,String,String,String,String)]):RDD[LogPage] = {
 
     val sc = source.context
     val ratings = sc.broadcast(Configuration.ratings)
@@ -61,13 +61,20 @@ object LogEvaluator extends Serializable {
       
       var first = true
       
-      val output = ArrayBuffer.empty[String]
+      val output = ArrayBuffer.empty[LogPage]
 
       for (entry <- data) {
         
         if (first) {     
           
-          var (sessid,starttime,userid,lasturl,visittime,referrer) = entry
+          sessid    = entry._1
+          starttime = entry._2
+          
+          userid  = entry._3
+          lasturl = entry._4
+          
+          visittime = entry._5
+          referrer  = entry._6
           
           endtime = starttime
           first = false
@@ -89,8 +96,7 @@ object LogEvaluator extends Serializable {
           
           rating = if (rating == 0) ratings.value.last._2 else rating
           
-          val out = sessid + "|" + userid + "|" + starttime + "|" + lasturl + "|" + visittime + "|" + referrer + "|" + timespent + "|" + rating
-          output += out
+          output += new LogPage(sessid,userid,starttime,lasturl,visittime,referrer,timespent,rating)
 
           endtime = entry._2
           lasturl = entry._4
@@ -105,9 +111,7 @@ object LogEvaluator extends Serializable {
       val rating    = 0
       val timespent = 0
         
-      val out = sessid + "|" + userid + "|" + starttime + "|" + lasturl + "|" + visittime + "|" + referrer + "|" + timespent + "|" + rating
-      output += out
-
+      output += new LogPage(sessid,userid,starttime,lasturl,visittime,referrer,timespent,rating)
       output
       
     })
@@ -129,39 +133,13 @@ object LogEvaluator extends Serializable {
       /* Sort single session data by timestamp */
       val data = valu._2.toList.sortBy(_._2)
 
-      val pages = ArrayBuffer.empty[String]
-
-      var sessid:String = null
-      var userid:String = null
-      
-      var lasturl:String  = null
-      var referrer:String = null
-      
-      var starttime:Long = 0
-      var endtime:Long   = 0
-      
-      var visittime:String = null
-      
-      var first = true
-      for (entry <- data) {
-
-        if (first) {
-          
-          var (sessid,starttime,userid,lasturl,visittime,referrer) = entry         
-          first = false
-          
-        } else {
-
-          endtime = entry._2
-          
-        }
-          
-        pages += entry._4
-       
-      }
-      
+      val pages = data.map(_._4)
+     
       /* Total number of page clicks */
       val total = pages.size
+      
+      val (sessid,starttime,userid,pageurl,visittime,referrer) = data.head
+      val endtime = data.last._2
       
       /* Total time spent for session */
       val timespent = (if (total > 1) (endtime - starttime) / 1000 else 0)
@@ -344,7 +322,7 @@ object LogEvaluator extends Serializable {
    * session match, partially match or do not match a predefined sequence
    * of page flows
    */
-  private def checkFlow(pages:ArrayBuffer[String]):Int = { 			
+  private def checkFlow(pages:List[String]):Int = { 			
     		
     val FLOW = Configuration.flow
     var j = 0
