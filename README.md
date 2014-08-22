@@ -10,7 +10,25 @@ Web Log Mining is used here to extract common web analytic parameters.
 
 ### Insights from Web Logs
 
-Checkout abandonment is of interest to any online retailer. We show how to determine abandoned checkouts from W3C web server logs with just a few lines of Scala code by using the functionality of Spark and SparkSQL.
+Checkout abandonment is of interest to any online retailer. We show how to determine abandoned checkouts from W3C web server logs with just a few lines of Scala code by using the functionality of Spark and Spark SQL.
+
+The code example illustrates how a distributed in-memory data structure (RDD) may be queried a SQL statement (query).
+```
+/**
+ * Apply query to in-memory web page descriptions
+ */
+def fromPages(sc:SparkContext,source:RDD[LogPage],query:String):SchemaRDD = {
+    
+  val sqlc = new SQLContext(sc)
+  val schema = sqlc.createSchemaRDD(source)
+    
+  val pages = sqlc.registerRDDAsTable(schema, "pages")
+
+  sqlc.sql(query)    
+    
+}
+```
+
 
 ---
 
