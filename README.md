@@ -20,5 +20,6 @@ Visitor conversion is the main topic for any ecommerce website, as conversion (u
 
 Predictive Analytics is a means to facilitate higher conversion rates: 
 
-Based on historical customer engagement data, and equipped with the visitor's behavior in any ongoing session, techniques from Predictive Analysis enable to determine the likelihood of the visitor converting during the session.
-With this information further actions may then be taken to enhance the chances of conversion.
+Based on historical customer engagement data, and equipped with the visitor's behavior in any ongoing session, appropriate techniques enable to determine the likelihood of the visitor converting during the session. From this information further actions may then be triggered to enhance the chances of conversion.
+
+We show how to predict the likelihood of a visitor converting in an ongoing session by using the functionality Spark and a Predictive Model implemented in Scala.
