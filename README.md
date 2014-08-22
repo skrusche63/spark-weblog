@@ -25,7 +25,7 @@ X6DUSPR2R53VZ53G,2XXW0J4N117Q,1335478101000,/addToCart/FPR477BM,00:09:35,http://
 C142FL33KKCV603E,UJAQ1TQWAGVL,1335478185000,/product/7Y4FP655,00:09:45,http://www.twitter.com,0,0
 ```
 
-The example shows how this distributed in-memory dataset is queried by a SQL statement (query) with just a few lines of code. The statement may be of the form: `select * from pages where rating > 1`.
+The example shows how this distributed in-memory dataset is queried by a SQL statement with just a few lines of code. The statement may be of the form: `select * from pages where rating > 1`.
 ```
 def fromPages(sc:SparkContext,source:RDD[LogPage],query:String):SchemaRDD = {
     
