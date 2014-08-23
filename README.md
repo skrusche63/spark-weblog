@@ -6,6 +6,9 @@ Web Log Analysis is based on log files that are compliant to the W3C web server 
 
 Web Log Mining is used here to extract common web analytic parameters.
 ![Spark-WebLog](https://raw.githubusercontent.com/skrusche63/spark-weblog/master/images/spark-weblog.png)
+
+The [Spark-Piwik](https://github.com/skrusche63/spark-piwik) project integrates [Piwik Analytics](http://piwik.org] with Spark and e.g. predicts the purchase horizon from customer engagement events with Markov Models. These models may also be applied to data from W3C web server logs to predict valuable parameters.
+
 ---
 
 ### Insights from Web Logs
