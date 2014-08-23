@@ -54,14 +54,46 @@ Based on historical customer engagement data, and equipped with the visitor's be
 
 We show how to predict the likelihood of a visitor converting in an ongoing session by using the functionality Spark and a Predictive Model implemented in Scala.
 
-The predictor provided in this project is a `Bayesian Predictor` as it is based on the [Bayesian Discriminant Analysis](http://en.wikipedia.org/wiki/Bayesian_inference). To build the predictor, the following information is extracted from the web log data:
+The predictor provided in this project is a `BayesianPredictor` as it is based on the [Bayesian Discriminant Analysis](http://en.wikipedia.org/wiki/Bayesian_inference). To build the predictor, the following information is extracted from the web log data:
 
 1. Click count histogram for unconverted visitors
 2. Click count histogram for converted visitors
 3. Session count where visitors did not convert
 4. Session count where visitors did convert
 
-From this information, the `Bayesian Predictor` computes the following parameters:
+The Scala code below is taken from the `BayesianPredictor` object and shows how to derive the histograms mentioned:
+```
+/**
+ * Input = (sessid,userid,total,starttime,timespent,referrer,exiturl,flowstatus)
+ */
+private def histogram(dataset:RDD[(String,String,Int,Long,Long,String,String,Int)]):RDD[((Int,Int),Int)] = {
+  /*
+   * The input contains one row per session. Each row contains the number of clicks 
+   * in the session, time spent in the session and a boolean indicating whether the 
+   * user converted during the session.
+   */
+  val histogram = dataset.map(valu => {
+      
+    val clicksPerSession = valu._3
+    val userConvertedPerSession = if (valu._8 == FLOW_COMPLETED) 1 else 0
+      
+    val k = (clicksPerSession,userConvertedPerSession)
+    val v = 1
+      
+    (k,v)
+    
+  }).reduceByKey(_ + _)
+    
+  /*
+   * Each row of the output contains the conversion flag, click count 
+   * per session and the number of sessions with those click counts. 
+   */ 
+  histogram
+    
+}
+```
+
+From this information, the `BayesianPredictor` computes the following parameters:
 
 1. p(c|v=0) : Probability of clicks per session, given the visitor did not convert in the session 
 2. p(c|v=1) : Probability of clicks per session, given the visitor converted in the session
@@ -72,6 +104,6 @@ Using Baye's theory, the probability of a visitor converting, given the clicks i
 ```
 p(v=1|c) = p(c|v=1) * p(v=1) / (p(c|v=0) * p(v=0) + p(c|v=1) * p(v=1))
 ```
-The `Bayesian Model` finally calculates the probability of visitor conversion from the number of clicks in a session. 
+The `BayesianModel` finally calculates the probability of visitor conversion from the number of clicks in a session. 
 
 
