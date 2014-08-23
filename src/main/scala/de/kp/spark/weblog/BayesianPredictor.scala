@@ -23,7 +23,7 @@ import org.apache.spark.rdd.RDD
 
 import de.kp.spark.weblog.Configuration._
 
-class BayesModel(probabilities:Map[Int,Double]) {
+class BayesianModel(probabilities:Map[Int,Double]) {
   
   def predict(clicks:Int) {
     
@@ -48,14 +48,14 @@ class BayesModel(probabilities:Map[Int,Double]) {
  * considered to be converted, if a certain sequence of page views 
  * appeared
  */
-object BayesPredictor {
+object BayesianPredictor {
   
   /**
    * LogEvaluator.eval2 -> train
    * 
    * Input = (sessid,userid,total,starttime,timespent,referrer,exiturl,flowstatus)
    */
-  def train(dataset:RDD[(String,String,Int,Long,Long,String,String,Int)]):BayesModel = {
+  def train(dataset:RDD[(String,String,Int,Long,Long,String,String,Int)]):BayesianModel = {
     
     val histo = histogram(dataset)
     
@@ -113,7 +113,7 @@ object BayesPredictor {
       
     })
     
-    new BayesModel(clickProbs)
+    new BayesianModel(clickProbs)
     
   }
 
