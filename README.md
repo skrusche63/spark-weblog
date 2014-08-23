@@ -72,6 +72,6 @@ Using Baye's theory, the probability of a visitor converting, given the clicks i
 ```
 p(v=1|c) = p(c|v=1) * p(v=1) / (p(c|v=0) * p(v=0) + p(c|v=1) * p(v=1))
 ```
-
+The `Bayesian Model` finally calculates the probability of visitor conversion from the number of clicks in a session. 
 
 
