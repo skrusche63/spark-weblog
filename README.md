@@ -5,7 +5,7 @@
 Web Log Analysis is based on log files that are compliant to the W3C web server log format. The IIS is a prominant candidate that supports this format. The mining functionality itself is not restricted to this format and may be easily adapted to other log files by changing configuration parameters.
 
 Web Log Mining is used here to extract common web analytic parameters.
-
+![Spark-WebLog](https://raw.githubusercontent.com/skrusche63/spark-weblog/master/images/spark-weblog.png)
 ---
 
 ### Insights from Web Logs
