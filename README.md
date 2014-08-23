@@ -53,3 +53,25 @@ Predictive Analytics is a means to facilitate higher conversion rates:
 Based on historical customer engagement data, and equipped with the visitor's behavior in any ongoing session, appropriate techniques enable to determine the likelihood of the visitor converting during the session. From this information further actions may then be triggered to enhance the chances of conversion.
 
 We show how to predict the likelihood of a visitor converting in an ongoing session by using the functionality Spark and a Predictive Model implemented in Scala.
+
+The predictor provided in this project is a `Bayesian Predictor` as it is based on the [Bayesian Discriminant Analysis](http://en.wikipedia.org/wiki/Bayesian_inference). To build the predictor, the following information is extracted from the web log data:
+
+1. Click count histogram for unconverted visitors
+2. Click count histogram for converted visitors
+3. Session count where visitors did not convert
+4. Session count where visitors did convert
+
+From this information, the `Bayesian Predictor` computes the following parameters:
+
+1. p(c|v=0) : Probability of clicks per session, given the visitor did not convert in the session 
+2. p(c|v=1) : Probability of clicks per session, given the visitor converted in the session
+3. p(v=0) : Unconditional probability of visitor did not convert in a session
+4. p(v=1) : Unconditional probability of visitor converted in a session
+
+Using Baye's theory, the probability of a visitor converting, given the clicks in the session `p(v=1|c)` may be computed by the following formula:
+```
+p(v=1|c) = p(c|v=1) * p(v=1) / (p(c|v=0) * p(v=0) + p(c|v=1) * p(v=1))
+```
+
+
+
