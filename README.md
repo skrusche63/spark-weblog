@@ -81,6 +81,20 @@ dataset.map(valu => {
 })
 
 ```
+These categorized web sessions may then be evaluated by the `select * from flows where category = 1':
+```
+def fromFlows(sc:SparkContext,source:RDD[LogFlow],query:String):SchemaRDD = {
+    
+  val sqlc = new SQLContext(sc)
+  val schema = sqlc.createSchemaRDD(source)
+    
+  val pages = sqlc.registerRDDAsTable(schema, "flows")
+
+  sqlc.sql(query)    
+    
+}
+
+```
 
 ---
 
