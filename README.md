@@ -13,7 +13,7 @@ The [Spark-Piwik](https://github.com/skrusche63/spark-piwik) project integrates 
 
 ### Insights from Web Logs
 
-Spark and Spark SQL are big data (mining) tools, that make it very easy to retrieve fasts insights from large-scale datasets. The following example describes how mining results, represented as Spark compliant data structures, are further evaluated by applying SQL queries. 
+Spark and Spark SQL are big data (mining) tools, that make it very easy to retrieve fast insights from large-scale datasets. The following example describes how mining results, represented as Spark compliant data structures, are further evaluated by applying SQL queries. 
 
 The dataset below is the result of a (first) mining task, applied to the web server log data:
 ```
