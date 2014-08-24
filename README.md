@@ -52,6 +52,36 @@ In this project, a conversion goal is defined as a sequence of selected page url
 | 1 | A visitor has visited at least one of the pages |
 | 2 | A visitor has visited all pages in the predefined order |
 
+Following this model, checkout abandonment means to discover all web visits from the W3C server log that are categorized with `category = 1`.
+
+The subsequent lines of Scala code describe how to categorize web visits:
+```
+/* Group source by sessionid */
+val dataset = source.groupBy(group => group._1)
+dataset.map(valu => {
+  
+  /* Sort single session data by timestamp */
+  val data = valu._2.toList.sortBy(_._2)
+
+  val pages = data.map(_._4)
+ 
+  /* Total number of page clicks */
+  val total = pages.size
+  
+  val (sessid,starttime,userid,pageurl,visittime,referrer) = data.head
+  val endtime = data.last._2
+  
+  /* Total time spent for session */
+  val timespent = (if (total > 1) (endtime - starttime) / 1000 else 0)
+  val exitpage = pages(total - 1)
+      
+  val category = categorize(pages)      
+  new LogFlow(sessid,userid,total,starttime,timespent,referrer,exitpage,category)
+      
+})
+
+```
+
 ---
 
 ### Predictions from Web Logs
