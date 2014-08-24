@@ -24,6 +24,17 @@ import org.json4s.native.Serialization
 import org.json4s.native.Serialization.{read,write}
 
 /**
+ * A task to extract checkout & conversion based information
+ * from the web server log file
+ */
+case class FlowMiningTask(
+  /*
+   * Name of web server log file
+   */
+  filename:String
+)
+
+/**
  * A task to extract relevant web page based information
  * from the web server log file
  */
@@ -32,6 +43,17 @@ case class PageMiningTask(
    * Name of web server log file
    */
   filename:String
+)
+
+case class LogFlow(
+  sessid:String,
+  userid:String,
+  total:Int,
+  starttime:Long,
+  timespent:Long,
+  referrer:String,
+  exitpage:String,
+  flowstatus:Int
 )
 
 /**
@@ -55,8 +77,12 @@ case class LogPage(
 object LogModel {
     
   implicit val formats = Serialization.formats(NoTypeHints)
-  
+
+  def serializeFlow(flow:LogFlow):String = write(flow)
+
   def serializePage(page:LogPage):String = write(page)
+  
+  def deserializeFlow(line:String):LogFlow = read[LogFlow](line)
   
   def deserializePage(line:String):LogPage = read[LogPage](line)
   

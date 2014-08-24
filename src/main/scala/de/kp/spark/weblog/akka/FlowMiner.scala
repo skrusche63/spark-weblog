@@ -23,9 +23,9 @@ import akka.actor.Actor
 import org.apache.hadoop.fs.{FileSystem,Path}
 import org.apache.hadoop.conf.{Configuration => HadoopConf}
 
-import de.kp.spark.weblog.{Configuration,LogEvaluator,LogExtractor,LogModel,PageMiningTask}
+import de.kp.spark.weblog.{Configuration,LogEvaluator,LogExtractor,LogModel,FlowMiningTask}
 
-class PageMiner extends Actor with SparkActor {
+class FlowMiner extends Actor with SparkActor {
   /*
    * Directory on the file system to read
    * and write from during the mining tasks
@@ -42,17 +42,17 @@ class PageMiner extends Actor with SparkActor {
   /*
    * Create Spark context
    */
-  private val sc = createLocalCtx("PageMiner",props)
+  private val sc = createLocalCtx("FlowMiner",props)
   
   def receive = {
     /*
-     * The PageMiningTask is responsible for extracting relevant
-     * information from a W3C compliant web log and computing
-     * the time spent on each page assigned with a page rating
+     * The FlowMiningTask is responsible for a) extracting relevant
+     * information from a W3C compliant web log, and b) computing 
+     * checkout specific data for each session
      * 
      * The mining result is written to the file system
      */
-    case req:PageMiningTask => {
+    case req:FlowMiningTask => {
       /*
        * Preparation step to extract configured data fields
        * from a web log file and return in a structured way
@@ -60,24 +60,23 @@ class PageMiner extends Actor with SparkActor {
       val logfile = MDIR + req.filename
       val sessions = LogExtractor.extract(sc, logfile)
       /*
-       * Mining #1: Compute time spent on each page within a session
-       * and rate these pages with respect to the time spent.
+       * Mining #2: Compute aggregated and checkout specific data
+       * for each web session or visit
        * 
        * This is an individual mining tasks that has no successor;
        * therefore all the data stored in the file system
        */
-      val pagefile = (MDIR + "pages")
+      val checkoutfile = (MDIR + "checkout")
       
       val fs = FileSystem.get(new HadoopConf())      
-      fs.delete(new Path(pagefile), true)     
+      fs.delete(new Path(checkoutfile), true)     
       
-      val pages = LogEvaluator.eval1(sessions)
-      pages.map(p => LogModel.serializePage(p)).saveAsTextFile(pagefile)
+      val flows = LogEvaluator.eval2(sessions)
+      flows.map(f => LogModel.serializeFlow(f)).saveAsTextFile(checkoutfile)
       
     }
     
     case _ => {}
   
   }
-  
 }

@@ -119,12 +119,17 @@ object LogEvaluator extends Serializable {
   }
   /**
    * This method is directly applied to the extraction result (see LogExtractor); 
-   * it specifies another aggregation step for the raw click data 
+   * it specifies another first level aggregation step of raw click data and
+   * determines the number of clicks (or page views) within a session, the total
+   * time of the session, referrer and exit page, and an indicator to describe
+   * whether this session led to no conversion, partly conversion or full conversion.
+   * 
+   * Partly converted sessions are interpreted as abandoned checkout. 
    * 
    * Input: session = (sessionid,timestamp,userid,pageurl,visittime,referrer)
    * 
    */
-  def eval2(source:RDD[(String,Long,String,String,String,String)]):RDD[(String,String,Int,Long,Long,String,String,Int)] = {
+  def eval2(source:RDD[(String,Long,String,String,String,String)]):RDD[LogFlow] = {
  
     /* Group source by sessionid */
     val dataset = source.groupBy(group => group._1)
@@ -143,14 +148,57 @@ object LogEvaluator extends Serializable {
       
       /* Total time spent for session */
       val timespent = (if (total > 1) (endtime - starttime) / 1000 else 0)
-      val exiturl = pages(total - 1)
+      val exitpage = pages(total - 1)
       
       /*
        * This is a simple session evaluation to determine whether the sequence of
        * pages per session matches with a predefined page flow
        */
       val flowstatus = checkFlow(pages)      
-      (sessid,userid,total,starttime,timespent,referrer,exiturl,flowstatus)
+      new LogFlow(sessid,userid,total,starttime,timespent,referrer,exitpage,flowstatus)
+      
+    })
+    
+  }
+  /**
+   * This method is directly applied to the extraction result (see LogExtractor); 
+   * it specifies another first level aggregation step of raw click data and
+   * determines the number of clicks (or page views) within a session, the total
+   * time of the session, referrer and exit page, and an indicator to describe
+   * whether this session led to no conversion, partly conversion or full conversion.
+   * 
+   * Partly converted sessions are interpreted as abandoned checkout. 
+   * 
+   * Input: session = (sessionid,timestamp,userid,pageurl,visittime,referrer)
+   * 
+   */
+  def eval3(source:RDD[(String,Long,String,String,String,String)]):RDD[(String,String,Int,Long,Long,String,String,Int)] = {
+ 
+    /* Group source by sessionid */
+    val dataset = source.groupBy(group => group._1)
+    dataset.map(valu => {
+      
+      /* Sort single session data by timestamp */
+      val data = valu._2.toList.sortBy(_._2)
+
+      val pages = data.map(_._4)
+     
+      /* Total number of page clicks */
+      val total = pages.size
+      
+      val (sessid,starttime,userid,pageurl,visittime,referrer) = data.head
+      val endtime = data.last._2
+      
+      /* Total time spent for session */
+      val timespent = (if (total > 1) (endtime - starttime) / 1000 else 0)
+      val exitpage = pages(total - 1)
+      
+      /*
+       * This is a simple session evaluation to determine whether the sequence of
+       * pages per session matches with a predefined page flow
+       */
+      val flowstatus = checkFlow(pages)      
+      (sessid,userid,total,starttime,timespent,referrer,exitpage,flowstatus)
       
     })
     
@@ -184,7 +232,7 @@ object LogEvaluator extends Serializable {
    * Input: (sessionid,userid,total,starttime,timespent,referrer,exiturl,flowstatus)
    * 
    */
-  def eval3(source:RDD[(String,String,Int,Long,Long,String,String,Int)]):RDD[String] = {
+  def eval4(source:RDD[(String,String,Int,Long,Long,String,String,Int)]):RDD[String] = {
     
     /* Group 'eval'2 results by userid */
     val dataset = source.groupBy(_._2)
