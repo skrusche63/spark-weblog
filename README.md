@@ -48,6 +48,9 @@ In this project, a conversion goal is defined as a sequence of selected page url
 
 | category | description |
 | --- | --- |
+| 0 | A visitor has not visited any of the predefined pages |
+| 1 | A visitor has visited at least one of the pages |
+| 2 | A visitor has visited all pages in the predefined order |
 
 ---
 
