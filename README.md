@@ -44,6 +44,10 @@ def fromPages(sc:SparkContext,source:RDD[LogPage],query:String):SchemaRDD = {
 
 Checkout abandonment is of interest to any online retailer. We show how to determine abandoned checkouts from W3C web server logs with just a few lines of Scala code by using the functionality of Spark and Spark SQL.
 
+In this project, a conversion goal is defined as a sequence of selected page urls the website of an online retailer. From this definition, web visits may be categorized as follows:
+
+| category | description |
+| --- | --- |
 
 ---
 
