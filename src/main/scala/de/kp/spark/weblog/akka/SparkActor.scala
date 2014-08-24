@@ -39,6 +39,10 @@ trait SparkActor {
 		
 	conf.setAppName(name);
     conf.set("spark.serializer", classOf[KryoSerializer].getName)		
+    /* 
+     * Set the Jetty port to 0 to find a random port
+     */
+    conf.set("spark.ui.port", "0")        
         
 	new SparkContext(conf)
 		

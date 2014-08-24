@@ -1,4 +1,4 @@
-package de.kp.spark.weblog.sample
+package de.kp.spark.weblog.akka
 /* Copyright (c) 2014 Dr. Krusche & Partner PartG
 * 
 * This file is part of the Spark-Weblog project
@@ -18,29 +18,32 @@ package de.kp.spark.weblog.sample
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-import de.kp.spark.weblog.LogInsight
+import akka.actor.{ActorSystem,Props}
+import com.typesafe.config.ConfigFactory
 
-object WebLogInsight extends SparkApp {
-  
-  def main(args:Array[String]) {
-    
-    val sc = createLocalCtx("WebLogInsight")
-    
-    val path = "/Work/tmp/web-log/"
-    /*
-     * Retrieve all pages from the W3C log file with a rating greater than 1
-     */
-    val pages = LogInsight.fromPages(sc, path + "pages", "select * from pages where rating > 1")  
-    pages .foreach(r => println(r))
+object LogService {
 
-    /*
-     * Retrieve all sessions from the W3C log file with checkout abandonment
-     */
-    val flows = LogInsight.fromFlows(sc, path + "flows", "select * from flows where flowstatus = 1")  
-    flows .foreach(r => println(r))
-
-    sc.stop()
+  def main(args: Array[String]) {
     
+    val name:String = "weblog-server"
+    val conf:String = "server.conf"
+
+    val server = new LogService(conf, name)
+    while (true) {}
+    
+    server.shutdown
+      
   }
 
+}
+
+class LogService(conf:String, name:String) {
+
+  val system = ActorSystem(name, ConfigFactory.load(conf))
+  sys.addShutdownHook(system.shutdown)
+
+  val master = system.actorOf(Props[LogMaster], name="log-master")
+
+  def shutdown = system.shutdown()
+  
 }

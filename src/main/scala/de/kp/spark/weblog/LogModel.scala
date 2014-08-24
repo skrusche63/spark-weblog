@@ -18,31 +18,60 @@ package de.kp.spark.weblog
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+import org.apache.spark.sql.Row
+
 import org.json4s._
 
 import org.json4s.native.Serialization
 import org.json4s.native.Serialization.{read,write}
 
+case class MiningStarted (
+  uid:String,
+  timestamp:Long,
+  status:String
+)
+
+case class MiningCompleted (
+  uid:String,
+  timestamp:Long,
+  status:String
+)
+
+case class FlowInsightRequest(
+  filename:String,
+  statement:String
+)
+
 /**
  * A task to extract checkout & conversion based information
  * from the web server log file
  */
-case class FlowMiningTask(
+case class FlowMiningRequest (
   /*
    * Name of web server log file
    */
   filename:String
 )
 
+case class PageInsightRequest(
+  filename:String,
+  statement:String
+)
+
 /**
  * A task to extract relevant web page based information
  * from the web server log file
  */
-case class PageMiningTask(
+case class PageMiningRequest (
   /*
    * Name of web server log file
    */
   filename:String
+)
+
+case class InsightResponse(
+  rows:Option[Array[Row]],
+  status:String
 )
 
 case class LogFlow(
@@ -59,7 +88,7 @@ case class LogFlow(
 /**
  * LogPage specifies a certain page url within a user session
  */
-case class LogPage(
+case class LogPage (
   sessid:String,
   userid:String,
   starttime:Long,
@@ -86,4 +115,11 @@ object LogModel {
   
   def deserializePage(line:String):LogPage = read[LogPage](line)
   
+}
+
+object LogStatus {
+  
+  val SUCCESS = "success"
+  val FAILURE = "failure"
+    
 }

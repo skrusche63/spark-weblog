@@ -23,7 +23,7 @@ import org.apache.spark.SparkContext._
 
 import org.apache.spark.rdd.RDD
 
-import org.apache.spark.sql.{SchemaRDD,SQLContext}
+import org.apache.spark.sql.{Row,SchemaRDD,SQLContext}
 
 import scala.reflect.ClassTag
 
@@ -32,50 +32,50 @@ object LogInsight {
   /**
    * Load session flow description from file system and apply query
    */
-  def fromFlows(sc:SparkContext,path:String,query:String):SchemaRDD = fromFile(sc,path,query,"flows")
+  def fromFlows(sc:SparkContext,path:String,query:String):Array[Row] = fromFile(sc,path,query,"flows")
   
   /**
    * Load web page description from file system and apply query
    */
-  def fromPages(sc:SparkContext,path:String,query:String):SchemaRDD = fromFile(sc,path,query,"pages")
+  def fromPages(sc:SparkContext,path:String,query:String):Array[Row] = fromFile(sc,path,query,"pages")
 
   /**
    * Apply query to in-memory session flow descriptions
    */
-  def fromFlows(sc:SparkContext,source:RDD[LogFlow],query:String):SchemaRDD = {
+  def fromFlows(sc:SparkContext,source:RDD[LogFlow],query:String):Array[Row] = {
     
     val sqlc = new SQLContext(sc)
     val schema = sqlc.createSchemaRDD(source)
     
     val pages = sqlc.registerRDDAsTable(schema, "flows")
 
-    sqlc.sql(query)    
-    
+    sqlc.sql(query).collect()    
+
   }
 
   /**
    * Apply query to in-memory web page descriptions
    */
-  def fromPages(sc:SparkContext,source:RDD[LogPage],query:String):SchemaRDD = {
+  def fromPages(sc:SparkContext,source:RDD[LogPage],query:String):Array[Row] = {
     
     val sqlc = new SQLContext(sc)
     val schema = sqlc.createSchemaRDD(source)
     
     val pages = sqlc.registerRDDAsTable(schema, "pages")
 
-    sqlc.sql(query)    
+    sqlc.sql(query).collect()    
     
   }
 
-  private def fromFile(sc:SparkContext,path:String,query:String,table:String):SchemaRDD = {
+  private def fromFile(sc:SparkContext,path:String,query:String,table:String):Array[Row] = {
     
     val sqlc = new SQLContext(sc)
     
     val flows = sqlc.jsonFile(path)
     flows.registerAsTable(table)
 
-    sqlc.sql(query)    
-    
+    sqlc.sql(query).collect()    
+
   }
 
 }

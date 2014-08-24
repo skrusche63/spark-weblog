@@ -29,7 +29,7 @@ class SparkApp {
 
 	System.setProperty("spark.executor.memory", "4g")
 	System.setProperty("spark.kryoserializer.buffer.mb","256")
-	/**
+	/*
 	 * Other configurations
 	 * 
 	 * System.setProperty("spark.cores.max", "532")
@@ -47,7 +47,11 @@ class SparkApp {
 		
 	conf.setAppName(name);
     conf.set("spark.serializer", classOf[KryoSerializer].getName)		
-        
+    
+    /* 
+     * Set the Jetty port to 0 to find a random port
+     */
+    conf.set("spark.ui.port", "0")        
 	new SparkContext(conf)
 		
   }

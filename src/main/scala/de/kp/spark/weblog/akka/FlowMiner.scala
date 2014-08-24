@@ -23,7 +23,10 @@ import akka.actor.Actor
 import org.apache.hadoop.fs.{FileSystem,Path}
 import org.apache.hadoop.conf.{Configuration => HadoopConf}
 
-import de.kp.spark.weblog.{Configuration,LogEvaluator,LogExtractor,LogModel,FlowMiningTask}
+import de.kp.spark.weblog.{Configuration,LogEvaluator,LogExtractor}
+import de.kp.spark.weblog.{LogModel,FlowMiningRequest,MiningStarted,MiningCompleted}
+
+import java.util.{Date,UUID}
 
 class FlowMiner extends Actor with SparkActor {
   /*
@@ -36,7 +39,7 @@ class FlowMiner extends Actor with SparkActor {
    * Specification of Spark specific system properties
    */
   private val props = Map(
-    "spark.executor.memory"          -> "4g",
+    "spark.executor.memory"          -> "1g",
 	"spark.kryoserializer.buffer.mb" -> "256"
   )
   /*
@@ -52,7 +55,16 @@ class FlowMiner extends Actor with SparkActor {
      * 
      * The mining result is written to the file system
      */
-    case req:FlowMiningTask => {
+    case req:FlowMiningRequest => {
+      
+      val origin = sender      
+      val uid = UUID.randomUUID().toString()
+      /*
+       * Send start message to originator of the request
+       */
+      val starttime = new Date().getTime()      
+      origin ! new MiningStarted(uid,starttime,"mining started")
+
       /*
        * Preparation step to extract configured data fields
        * from a web log file and return in a structured way
@@ -73,6 +85,15 @@ class FlowMiner extends Actor with SparkActor {
       
       val flows = LogEvaluator.eval2(sessions)
       flows.map(f => LogModel.serializeFlow(f)).saveAsTextFile(flowfile)
+
+      /*
+       * Send final message to originator of the request
+       */
+      val endtime = new Date().getTime()     
+      origin ! new MiningCompleted(uid,endtime,"mining finished")
+      
+      sc.stop
+      context.stop(self)  
       
     }
     
