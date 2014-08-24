@@ -32,6 +32,7 @@ object WebLogMiner extends SparkApp {
   def main(args:Array[String]) {
     
     val sc = createLocalCtx("WebLogMiner")
+    val fs = FileSystem.get(new HadoopConf())      
     /*
      * Directory on the file system to read
      * and write from during the mining tasks
@@ -49,15 +50,27 @@ object WebLogMiner extends SparkApp {
      * This is an individual mining tasks that has no successor;
      * therefore all the data stored in the file system
      */
-    val pagefile = (Configuration.MINING_DIR + "pages")
-      
-    val fs = FileSystem.get(new HadoopConf())      
+    val pagefile = (Configuration.MINING_DIR + "pages")      
     fs.delete(new Path(pagefile), true)     
     
     val pages = LogEvaluator.eval1(sessions)
     pages.map(p => LogModel.serializePage(p)).saveAsTextFile(pagefile)
 
     pages.collect().foreach(p => println(p))
+    /*
+     * Mining #2: Compute aggregated and checkout specific data
+     * for each web session or visit.
+     * 
+     * This is an individual mining tasks that has no successor;
+     * therefore all the data stored in the file system
+     */
+    val flowfile = (Configuration.MINING_DIR + "flows")      
+    fs.delete(new Path(flowfile), true)     
+    
+    val flows = LogEvaluator.eval2(sessions)
+    flows.map(f => LogModel.serializeFlow(f)).saveAsTextFile(flowfile)
+
+    flows.collect().foreach(f => println(f))
     
   }
 }

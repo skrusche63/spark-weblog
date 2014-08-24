@@ -9,10 +9,18 @@ object WebLogInsight extends SparkApp {
     val sc = createLocalCtx("WebLogInsight")
     
     val path = "/Work/tmp/web-log/"
-    val rows = LogInsight.fromPages(sc, path + "pages", "select * from pages where rating > 1")
-  
-    rows .foreach(r => println(r))
-    
+    /*
+     * Retrieve all pages from the W3C log file with a rating greater than 1
+     */
+    val pages = LogInsight.fromPages(sc, path + "pages", "select * from pages where rating > 1")  
+    pages .foreach(r => println(r))
+
+    /*
+     * Retrieve all sessions from the W3C log file with checkout abandonment
+     */
+    val flows = LogInsight.fromFlows(sc, path + "flows", "select * from flows where flowstatus = 1")  
+    flows .foreach(r => println(r))
+
     sc.stop()
     
   }

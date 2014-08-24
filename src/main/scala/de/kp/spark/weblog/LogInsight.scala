@@ -25,17 +25,29 @@ import org.apache.spark.rdd.RDD
 
 import org.apache.spark.sql.{SchemaRDD,SQLContext}
 
-object LogInsight {
+import scala.reflect.ClassTag
 
+object LogInsight {
+  
+  /**
+   * Load session flow description from file system and apply query
+   */
+  def fromFlows(sc:SparkContext,path:String,query:String):SchemaRDD = fromFile(sc,path,query,"flows")
+  
   /**
    * Load web page description from file system and apply query
    */
-  def fromPages(sc:SparkContext,path:String,query:String):SchemaRDD = {
+  def fromPages(sc:SparkContext,path:String,query:String):SchemaRDD = fromFile(sc,path,query,"pages")
+
+  /**
+   * Apply query to in-memory session flow descriptions
+   */
+  def fromFlows(sc:SparkContext,source:RDD[LogFlow],query:String):SchemaRDD = {
     
     val sqlc = new SQLContext(sc)
+    val schema = sqlc.createSchemaRDD(source)
     
-    val pages = sqlc.jsonFile(path)
-    pages.registerAsTable("pages")
+    val pages = sqlc.registerRDDAsTable(schema, "flows")
 
     sqlc.sql(query)    
     
@@ -54,5 +66,16 @@ object LogInsight {
     sqlc.sql(query)    
     
   }
-  
+
+  private def fromFile(sc:SparkContext,path:String,query:String,table:String):SchemaRDD = {
+    
+    val sqlc = new SQLContext(sc)
+    
+    val flows = sqlc.jsonFile(path)
+    flows.registerAsTable(table)
+
+    sqlc.sql(query)    
+    
+  }
+
 }

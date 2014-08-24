@@ -66,13 +66,13 @@ class FlowMiner extends Actor with SparkActor {
        * This is an individual mining tasks that has no successor;
        * therefore all the data stored in the file system
        */
-      val checkoutfile = (MDIR + "checkout")
+      val flowfile = (MDIR + "flows")
       
       val fs = FileSystem.get(new HadoopConf())      
-      fs.delete(new Path(checkoutfile), true)     
+      fs.delete(new Path(flowfile), true)     
       
       val flows = LogEvaluator.eval2(sessions)
-      flows.map(f => LogModel.serializeFlow(f)).saveAsTextFile(checkoutfile)
+      flows.map(f => LogModel.serializeFlow(f)).saveAsTextFile(flowfile)
       
     }
     
