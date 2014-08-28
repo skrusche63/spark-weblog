@@ -59,51 +59,61 @@ object Configuration {
   val FLOW_NOT_ENTERED = 0  
   val FLOW_ENTERED     = 1
   val FLOW_COMPLETED   = 2
-    
-  /*
-   * MINING CONFIGURATION
-   */
-  val MINING_PATH = "path"
+  
+  /* Conversion file */
+  private val GOAL_PATH = "path"    
+  /* Mining directory */
+  private val MINING_PATH = "path"
   
   
   private val path = "application.conf"
-    
-  private val logfileCfg = ConfigFactory.load(path).getConfig("logfile")
-  private val miningCfg  = ConfigFactory.load(path).getConfig("mining")
+  private val conf = ConfigFactory.load(path)
+
+  private val conversionProps = fromConversionCfg()
 
   private val logfileProps = fromLogfileCfg()
   private val miningProps  = fromMiningCfg()
 
+  private def fromConversionCfg(): Map[String,String] = {
+
+    val cfg = conf.getConfig("conversion")
+    Map(GOAL_PATH -> cfg.getString(GOAL_PATH))
+    
+  }
+
   private def fromLogfileCfg(): Map[String,String] = {
   
+    val cfg = conf.getConfig("logfile")
+    
     Map(
       /*
        * Main settings to split a log line into a set of fields
        */
-      FIELD_DELIMITER -> logfileCfg.getString(FIELD_DELIMITER),
-      FIELD_METADATA  -> logfileCfg.getString(FIELD_METADATA),
+      FIELD_DELIMITER -> cfg.getString(FIELD_DELIMITER),
+      FIELD_METADATA  -> cfg.getString(FIELD_METADATA),
       /*
        * Specific field evaluation
        */
-      FIELD_SESSIONID -> logfileCfg.getString(FIELD_SESSIONID),
+      FIELD_SESSIONID -> cfg.getString(FIELD_SESSIONID),
       
-      FIELD_USERID -> logfileCfg.getString(FIELD_USERID),
-      COOKIE_DELIMITER -> logfileCfg.getString(COOKIE_DELIMITER),
+      FIELD_USERID -> cfg.getString(FIELD_USERID),
+      COOKIE_DELIMITER -> cfg.getString(COOKIE_DELIMITER),
       
-      PAGE_RATING -> logfileCfg.getString(PAGE_RATING),
+      PAGE_RATING -> cfg.getString(PAGE_RATING),
       
       /*
        * Conversion indicator
        */
-      FLOW_SEQUENCE -> logfileCfg.getString(FLOW_SEQUENCE)
+      FLOW_SEQUENCE -> cfg.getString(FLOW_SEQUENCE)
     )
     
   }
 
   private def fromMiningCfg(): Map[String,String] = {
-    Map(
-      MINING_PATH -> miningCfg.getString(MINING_PATH)
-    )
+
+    val cfg = conf.getConfig("mining")
+    Map(MINING_PATH -> cfg.getString(MINING_PATH))
+    
   }
   /*
    * Data format
@@ -143,6 +153,12 @@ object Configuration {
   def SESSION_ID_NAME = logfileProps(FIELD_SESSIONID)
   
   def USER_ID_NAME = logfileProps(FIELD_USERID)
+
+  /*
+   * Returns a specific XML file on the file system
+   * that describes all conversion goals
+   */
+  def GOAL_FILE = conversionProps(GOAL_PATH)
 
   /*
    * Returns the specified directory on the file system

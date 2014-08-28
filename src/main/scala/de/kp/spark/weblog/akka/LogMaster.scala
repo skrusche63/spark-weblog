@@ -19,7 +19,6 @@ package de.kp.spark.weblog.akka
 */
 
 import akka.actor.{Actor,ActorLogging,ActorRef,Props}
-import akka.contrib.pattern.Aggregator
 
 import akka.pattern.ask
 import akka.util.Timeout

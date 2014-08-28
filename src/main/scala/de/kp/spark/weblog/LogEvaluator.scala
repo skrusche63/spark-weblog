@@ -21,6 +21,7 @@ package de.kp.spark.weblog
 import org.apache.spark.rdd.RDD
 
 import de.kp.spark.weblog.Configuration._
+import de.kp.spark.weblog.goal.Goals
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
@@ -370,8 +371,20 @@ object LogEvaluator extends Serializable {
    * session match, partially match or do not match a predefined sequence
    * of page flows
    */
-  private def checkFlow(pages:List[String]):Int = { 			
-    		
+  private def checkFlow(pages:List[String],flow:Array[String]=Configuration.flow):Int = Goals.checkFlow(pages,flow)
+
+  /**
+   * A helper method to evaluate whether the pages clicked in a certain 
+   * session match, partially match or do not match a predefined sequences
+   * of page flows
+   */
+  private def checkFlows(pages:List[String]):Int = { 			
+    
+    val flows = Goals.getFlows
+    for ((fid,flow) <- flows) {
+      
+    }
+    
     val FLOW = Configuration.flow
     var j = 0
     var	flowStat = FLOW_NOT_ENTERED

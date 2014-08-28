@@ -20,9 +20,6 @@ package de.kp.spark.weblog.akka
 
 import akka.actor.Actor
 
-import org.apache.hadoop.fs.{FileSystem,Path}
-import org.apache.hadoop.conf.{Configuration => HadoopConf}
-
 import de.kp.spark.weblog.{Configuration,LogInsight,LogStatus}
 import de.kp.spark.weblog.{InsightResponse,FlowInsightRequest}
 
