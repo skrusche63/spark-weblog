@@ -1,6 +1,6 @@
 ![Dr.Krusche & Partner PartG](https://raw.github.com/skrusche63/spark-elastic/master/images/dr-kruscheundpartner.png)
 
-### Web Log Mining with Spark
+### Reactive Web Log Mining with Spark
 
 Web Log Analysis is based on log files that are compliant to the W3C web server log format. The IIS is a prominant candidate that supports this format. The mining functionality itself is not restricted to this format and may be easily adapted to other log files by changing configuration parameters.
 
@@ -8,6 +8,16 @@ Web Log Mining is used here to extract common web analytic parameters.
 ![Spark-WebLog](https://raw.githubusercontent.com/skrusche63/spark-weblog/master/images/spark-weblog.png)
 
 The [Spark-Piwik](https://github.com/skrusche63/spark-piwik) project integrates [Piwik Analytics](http://piwik.org) with Spark and e.g. predicts the purchase horizon from customer engagement events with Markov Models. These models may also be applied to data from W3C web server logs to predict valuable parameters.
+
+---
+
+### Web Log Micro Service 
+
+This project implements a micro service based on Akka Remoting, and may therefore easily be integrated in any Akka-based loose coupling environment. This architectural approach brings the power of Spark to distributed data processing systems.
+
+Akka is a toolkit to build concurrent scalable applications, using the [Actor Model](http://en.wikipedia.org/wiki/Actor_model). Akka comes with a feature called *Akka Remoting*, which easily enables to setup a communication between software components in a peer-to-peer fashion.
+
+Akka and Akka Remoting may therefore be used as an appropriate means to establish a communication between prior independent software components - easy and fast.
 
 ---
 
