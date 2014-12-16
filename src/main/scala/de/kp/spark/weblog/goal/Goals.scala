@@ -29,27 +29,33 @@ import scala.collection.mutable.{ArrayBuffer,HashMap}
 import scala.util.control.Breaks._
 
 /**
- * A helper class to handle file-based conversion goals
+ * Conversion goals are specified as a sequence (flow) of 
+ * page views; the Goals object loads these pred-defined
+ * conversion goals from the local file system and determines,
+ * whether a certain sequence of page clicks matches a goal
+ * or even not.
  */
 object Goals {
 
-  private val conf = Configuration
-  private val file = Configuration.GOAL_FILE
+  private val path = "goals.xml"
+  private val flows = build
   
-  private val goals:Elem = XML.load(file)
-  private val flows = HashMap.empty[String,Array[String]]
-  
-  private def load() {
+  private def build:HashMap[String,Array[String]] = {
 
-    for (goal <- goals \ "goal") {
+    val data = HashMap.empty[String,Array[String]]
+    val root = XML.load(getClass.getClassLoader.getResource(path))     
+
+    for (goal <- root \ "goal") {
       
       val fid  = (goal \ "@id").toString
       val flow = goal.text.split(",")
       
-      flows += fid -> flow
+      data += fid -> flow
       
     }
 
+    data
+    
   }
 
   def getFlow(fid:String):Option[Array[String]] = {

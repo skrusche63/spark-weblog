@@ -30,7 +30,11 @@ import de.kp.spark.core.model._
  * total number of page visits (total), the session duration (timespent), and
  * the flow status with respect to a specific conversion flow is computed.
  * 
- * Example:
+ * In this project, the LogFlow is used to correlate the number of page visits
+ * with the flow status of the session and train a Bayesian model to predict the
+ * conversion probability from the number of clicks.
+ * 
+ * Beyond Web Analytics Example:
  * 
  * In addition to these first analytics results, a session can be converted
  * into a Markovian state, and the probability for following states can be
@@ -51,6 +55,11 @@ case class LogFlow(
 
 case class LogFlows(items:List[LogFlow])
 
+/**
+ * LogPage specifies a certain page visit within web session; as an 
+ * added value, the visit duration (timespent) and a rating derived 
+ * from the time spent is computed.
+ */
 case class LogPage (
   sessid:String,
   userid:String,

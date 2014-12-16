@@ -60,9 +60,6 @@ class RestApi(host:String,port:Int,system:ActorSystem,@transient sc:SparkContext
     RestService.start(routes,system,host,port)
   }
 
-  /*
-   * The routes defines the different access channels this API supports
-   */
   private def routes:Route = {
 
     path("get" / Segment) {subject =>  
@@ -91,7 +88,23 @@ class RestApi(host:String,port:Int,system:ActorSystem,@transient sc:SparkContext
     
     
   }
-
+  /**
+   * The weblog REST service actually supports three different models, which are
+   * all derived from a W3 compliant web log file:
+   * 
+   * 'click': this model computes the correlation of page clicks in a session
+   * and conversions with respect to a certain pre-defined conversion goal.
+   * 
+   * 'flow': this 'model' derives characteristic attributes for web sessions
+   * and stores this aggregated information as a parquet file on HDFS. The data
+   * are used to apply SQL-like queries, and can also be used with other analysis
+   * tasks from Predictiveworks.
+   * 
+   * 'page': this 'model' derives characteristic attributes for web pages within
+   * a certain session and and stores this aggregated information as a parquet file 
+   * on HDFS. The data are used to apply SQL-like queries, and can also be used with 
+   * other analysis tasks from Predictiveworks.
+   */
   private def doTrain[T](ctx:RequestContext,subject:String) = {
     
     val task = "train:" + subject
