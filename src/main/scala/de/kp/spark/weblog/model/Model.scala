@@ -26,7 +26,17 @@ import org.json4s.native.Serialization.{read,write}
 import de.kp.spark.core.model._
 
 /**
- * DATA MODEL
+ * LogFlow specifies a summary of a certain session; as an added value, the
+ * total number of page visits (total), the session duration (timespent), and
+ * the flow status with respect to a specific conversion flow is computed.
+ * 
+ * Example:
+ * 
+ * In addition to these first analytics results, a session can be converted
+ * into a Markovian state, and the probability for following states can be
+ * derived. Starting from these states, Intent Recognition and also Outlier
+ * Detection can be used for deeper insight into a web session.
+ *  
  */
 case class LogFlow(
   sessid:String,
@@ -53,6 +63,18 @@ case class LogPage (
 )
 
 case class LogPages(items:List[LogPage])
+
+object FlowStatus {
+
+  /*
+   * A set of indicators to specified whether 
+   * a certain conversion has been achieved
+   */
+  val FLOW_NOT_ENTERED:Int = 0  
+  val FLOW_ENTERED:Int     = 1
+  val FLOW_COMPLETED:Int   = 2
+  
+}
 
 object Messages extends BaseMessages {
  

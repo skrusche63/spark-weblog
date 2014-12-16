@@ -25,13 +25,15 @@ import de.kp.spark.weblog.model._
 import de.kp.spark.weblog.Configuration._
 import de.kp.spark.weblog.goal.Goals
 
+import de.kp.spark.weblog.xml._
+
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 
 class W3LogEvaluator extends Serializable {
 
   /**
-   * This method is directly applied to the extraction result (see LogExtactor); 
+   * This method is directly applied to the extraction result (see W3LogModel); 
    * it specifies a first level aggregation of raw click data and determines the 
    * time spent on a certain page in seconds, and assigns a specific rating from 
    * a predefined time rating (see configuration)
@@ -41,7 +43,7 @@ class W3LogEvaluator extends Serializable {
   def logPages(source:RDD[(String,Long,String,String,String,String)]):RDD[LogPage] = {
 
     val sc = source.context
-    val ratings = sc.broadcast(Configuration.ratings)
+    val ratings = sc.broadcast(PageRatings.values)
     
     /* Group source by sessionid */
     val dataset = source.groupBy(group => group._1)
@@ -312,7 +314,7 @@ class W3LogEvaluator extends Serializable {
        	count += 1
         			
        	stati += entry._8
-        if (entry._8 == FLOW_COMPLETED ) {
+        if (entry._8 == FlowStatus.FLOW_COMPLETED ) {
           /*
            * Gather data to determine average
            * number of visits before conversion
@@ -389,7 +391,7 @@ class W3LogEvaluator extends Serializable {
     
     val FLOW = Configuration.flow
     var j = 0
-    var	flowStat = FLOW_NOT_ENTERED
+    var	flowStat = FlowStatus.FLOW_NOT_ENTERED
     		
     var matched = false;
     		
@@ -403,7 +405,7 @@ class W3LogEvaluator extends Serializable {
          * configured url part of the flow
          */
     	if (pages(j).startsWith(FLOW(i))) {
-    	  flowStat = (if (i == FLOW.length - 1) FLOW_COMPLETED else FLOW_ENTERED)
+    	  flowStat = (if (i == FLOW.length - 1) FlowStatus.FLOW_COMPLETED else FlowStatus.FLOW_ENTERED)
     	  matched = true
     				
     	}

@@ -1,0 +1,33 @@
+<ratings>
+  <!-- These scores are assigned to page visits, and weighten the time spent on a certain page -->
+  <rating>
+    <!-- time spent in seconds -->
+    <timespent>10</timespent>
+    <score>1</score>
+  </rating>
+  <rating>
+    <!-- time spent in seconds -->
+    <timespent>20</timespent>
+    <score>2</score>
+  </rating>
+  <rating>
+    <!-- time spent in seconds -->
+    <timespent>35</timespent>
+    <score>3</score>
+  </rating>
+  <rating>
+    <!-- time spent in seconds -->
+    <timespent>55</timespent>
+    <score>4</score>
+  </rating>
+  <rating>
+    <!-- time spent in seconds -->
+    <timespent>80</timespent>
+    <score>5</score>
+  </rating>
+  <rating>
+    <!-- time spent in seconds -->
+    <timespent>120</timespent>
+    <score>6</score>
+  </rating>
+</ratings>

@@ -1,4 +1,4 @@
-![Dr.Krusche & Partner PartG](https://raw.github.com/skrusche63/spark-elastic/master/images/dr-kruscheundpartner.png)
+![Dr.Krusche & Partner PartG](https://raw.github.com/skrusche63/spark-weblog/master/images/dr_kruscheundpartner_640.png)
 
 ### Reactive Web Log Mining with Spark
 

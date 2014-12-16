@@ -58,15 +58,7 @@ object Configuration extends CoreConf {
   val FLOW_SEQUENCE = "flow.sequence"
     
   val PAGE_RATING = "pagetime.rating"
-
-  /*
-   * A set of indicators to specified whether 
-   * a certain conversion has been achieved
-   */
-  val FLOW_NOT_ENTERED = 0  
-  val FLOW_ENTERED     = 1
-  val FLOW_COMPLETED   = 2
-  
+ 
   /* Conversion file */
   private val GOAL_PATH = "path"    
   /* Mining directory */
@@ -135,17 +127,6 @@ object Configuration extends CoreConf {
   }
 
   def flow = logfileProps(FLOW_SEQUENCE).split(",")
-  
-  def ratings:Map[Int,Int] = {
-    
-    logfileProps(PAGE_RATING).split(",").map(valu => {
-      
-      val Array(timespent,rating) = valu.split(":")
-      (timespent.toInt,rating.toInt)
-    
-    }).toMap
-
-  }
   
   def getLogFileProps:Map[String,String] = logfileProps
 

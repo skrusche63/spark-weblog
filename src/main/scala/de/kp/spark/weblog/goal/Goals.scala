@@ -21,6 +21,8 @@ package de.kp.spark.weblog.goal
 import de.kp.spark.weblog.Configuration
 import de.kp.spark.weblog.Configuration._
 
+import de.kp.spark.weblog.model._
+
 import scala.xml._
 
 import scala.collection.mutable.{ArrayBuffer,HashMap}
@@ -66,7 +68,7 @@ object Goals {
   def checkFlow(pages:List[String],flow:Array[String]):Int = { 			
     		
     var j = 0
-    var	flowStat = FLOW_NOT_ENTERED
+    var	flowStat = FlowStatus.FLOW_NOT_ENTERED
     		
     var matched = false;
     		
@@ -80,7 +82,7 @@ object Goals {
          * configured url part of the flow
          */
     	if (pages(j).startsWith(flow(i))) {
-    	  flowStat = (if (i == flow.length - 1) FLOW_COMPLETED else FLOW_ENTERED)
+    	  flowStat = (if (i == flow.length - 1) FlowStatus.FLOW_COMPLETED else FlowStatus.FLOW_ENTERED)
     	  matched = true
     				
     	}

@@ -126,7 +126,7 @@ object BayesianPredictor {
     
     val counts = dataset.map(valu => {
       
-      val userConvertedPerSession = if (valu.flowstatus == FLOW_COMPLETED) 1 else 0
+      val userConvertedPerSession = if (valu.flowstatus == FlowStatus.FLOW_COMPLETED) 1 else 0
       
       val k = userConvertedPerSession
       val v = 1
@@ -158,7 +158,7 @@ object BayesianPredictor {
     val histogram = dataset.map(valu => {
       
       val clicksPerSession = valu.total
-      val userConvertedPerSession = if (valu.flowstatus == FLOW_COMPLETED) 1 else 0
+      val userConvertedPerSession = if (valu.flowstatus == FlowStatus.FLOW_COMPLETED) 1 else 0
       
       val k = (clicksPerSession,userConvertedPerSession)
       val v = 1
