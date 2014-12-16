@@ -22,10 +22,11 @@ import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
 import de.kp.spark.weblog.Configuration._
+import de.kp.spark.weblog.model._
 
 class BayesianModel(probabilities:Map[Int,Double]) {
   
-  def predict(clicks:Int) {
+  def predict(clicks:Int):Double = {
     
     val nearest = probabilities.map(valu => {
       
@@ -39,6 +40,7 @@ class BayesianModel(probabilities:Map[Int,Double]) {
     probabilities(nearest)
     
   }
+  
 }
 
 /**
@@ -51,11 +53,9 @@ class BayesianModel(probabilities:Map[Int,Double]) {
 object BayesianPredictor {
   
   /**
-   * LogEvaluator.eval2 -> train
-   * 
    * Input = (sessid,userid,total,starttime,timespent,referrer,exiturl,flowstatus)
    */
-  def train(dataset:RDD[(String,String,Int,Long,Long,String,String,Int)]):BayesianModel = {
+  def train(dataset:RDD[LogFlow]):BayesianModel = {
     
     val histo = histogram(dataset)
     
@@ -118,16 +118,15 @@ object BayesianPredictor {
   }
 
   /**
-   * LogEvaluator.eval2 -> conversions
    * 
    * Input = (sessid,userid,total,starttime,timespent,referrer,exiturl,flowstatus)
    * 
    */
-  private def conversions(dataset:RDD[(String,String,Int,Long,Long,String,String,Int)]):RDD[(Int,Int)] = {
+  private def conversions(dataset:RDD[LogFlow]):RDD[(Int,Int)] = {
     
     val counts = dataset.map(valu => {
       
-      val userConvertedPerSession = if (valu._8 == FLOW_COMPLETED) 1 else 0
+      val userConvertedPerSession = if (valu.flowstatus == FLOW_COMPLETED) 1 else 0
       
       val k = userConvertedPerSession
       val v = 1
@@ -150,7 +149,7 @@ object BayesianPredictor {
    * Input = (sessid,userid,total,starttime,timespent,referrer,exiturl,flowstatus)
    * 
    */
-  private def histogram(dataset:RDD[(String,String,Int,Long,Long,String,String,Int)]):RDD[((Int,Int),Int)] = {
+  private def histogram(dataset:RDD[LogFlow]):RDD[((Int,Int),Int)] = {
     /*
      * The input contains one row per session. Each row contains the number of clicks 
      * in the session, time spent in the session and a boolean indicating whether the 
@@ -158,8 +157,8 @@ object BayesianPredictor {
      */
     val histogram = dataset.map(valu => {
       
-      val clicksPerSession = valu._3
-      val userConvertedPerSession = if (valu._8 == FLOW_COMPLETED) 1 else 0
+      val clicksPerSession = valu.total
+      val userConvertedPerSession = if (valu.flowstatus == FLOW_COMPLETED) 1 else 0
       
       val k = (clicksPerSession,userConvertedPerSession)
       val v = 1

@@ -18,12 +18,19 @@ package de.kp.spark.weblog
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+import com.typesafe.config.ConfigFactory
+import org.apache.hadoop.conf.{Configuration => HConf}
+
+import de.kp.spark.core.{Configuration => CoreConf}
+
 import java.text.SimpleDateFormat
 
-import com.typesafe.config.ConfigFactory
 import scala.collection.mutable.HashMap
 
-object Configuration {
+object Configuration extends CoreConf {
+  
+  private val path = "application.conf"
+  private val config = ConfigFactory.load(path)
 
   /*
    * LOG FILE CONFIGURATION
@@ -64,10 +71,6 @@ object Configuration {
   private val GOAL_PATH = "path"    
   /* Mining directory */
   private val MINING_PATH = "path"
-  
-  
-  private val path = "application.conf"
-  private val conf = ConfigFactory.load(path)
 
   private val conversionProps = fromConversionCfg()
 
@@ -76,14 +79,14 @@ object Configuration {
 
   private def fromConversionCfg(): Map[String,String] = {
 
-    val cfg = conf.getConfig("conversion")
+    val cfg = config.getConfig("conversion")
     Map(GOAL_PATH -> cfg.getString(GOAL_PATH))
     
   }
 
   private def fromLogfileCfg(): Map[String,String] = {
   
-    val cfg = conf.getConfig("logfile")
+    val cfg = config.getConfig("logfile")
     
     Map(
       /*
@@ -111,7 +114,7 @@ object Configuration {
 
   private def fromMiningCfg(): Map[String,String] = {
 
-    val cfg = conf.getConfig("mining")
+    val cfg = config.getConfig("mining")
     Map(MINING_PATH -> cfg.getString(MINING_PATH))
     
   }
@@ -144,7 +147,7 @@ object Configuration {
 
   }
   
-  def config:Map[String,String] = logfileProps
+  def getLogFileProps:Map[String,String] = logfileProps
 
   def COOKIE_DELIM = logfileProps(COOKIE_DELIMITER)
   
@@ -165,5 +168,76 @@ object Configuration {
    * where to read and write mining results
    */
   def MINING_DIR = miningProps(MINING_PATH)
+
+  override def actor:(Int,Int,Int) = {
+  
+    val cfg = config.getConfig("actor")
+
+    val duration = cfg.getInt("duration")
+    val retries = cfg.getInt("retries")  
+    val timeout = cfg.getInt("timeout")
+    
+    (duration,retries,timeout)
+    
+  }
+
+  override def elastic:HConf = {
+  
+    val cfg = config.getConfig("elastic")
+    val conf = new HConf()                          
+
+    conf.set("es.nodes",cfg.getString("es.nodes"))
+    conf.set("es.port",cfg.getString("es.port"))
+
+    conf.set("es.resource", cfg.getString("es.resource"))                
+    conf.set("es.query", cfg.getString("es.query"))                          
+ 
+    conf
+    
+  }
+   
+  override def input:List[String] = {
+  
+    val cfg = config.getConfig("file")
+    List(cfg.getString("path"))   
+    
+  }
+ 
+  override def mysql:(String,String,String,String) = null
+  
+  override def output:List[String] = null
+  
+  override def redis:(String,String) = {
+  
+    val cfg = config.getConfig("redis")
+    
+    val host = cfg.getString("host")
+    val port = cfg.getString("port")
+    
+    (host,port)
+    
+  }
+
+  override def rest:(String,Int) = {
+      
+    val cfg = config.getConfig("rest")
+      
+    val host = cfg.getString("host")
+    val port = cfg.getInt("port")
+
+    (host,port)
+    
+  }
+  
+  override def spark:Map[String,String] = {
+  
+    val cfg = config.getConfig("spark")
+    
+    Map(
+      "spark.executor.memory"          -> cfg.getString("spark.executor.memory"),
+	  "spark.kryoserializer.buffer.mb" -> cfg.getString("spark.kryoserializer.buffer.mb")
+    )
+
+  }
   
 }

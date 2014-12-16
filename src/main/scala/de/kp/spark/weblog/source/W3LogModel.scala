@@ -1,4 +1,4 @@
-package de.kp.spark.weblog
+package de.kp.spark.weblog.source
 /* Copyright (c) 2014 Dr. Krusche & Partner PartG
 * 
 * This file is part of the Spark-Weblog project
@@ -19,26 +19,17 @@ package de.kp.spark.weblog
 */
 
 import org.apache.spark.SparkContext
-import org.apache.spark.SparkContext._
-
 import org.apache.spark.rdd.RDD
+
+import de.kp.spark.core.model._
 
 import de.kp.spark.weblog.Configuration._
 
-import scala.collection.mutable.{ArrayBuffer,HashMap}
-import scala.util.control.Breaks._
+class W3LogModel(@transient sc:SparkContext) extends Serializable {
 
-object LogExtractor extends Serializable {
-
-  private val settings  = Configuration.config
-  private val fieldspec = Configuration.fieldspec
+  def buildFile(req:ServiceRequest,rawset:RDD[String]):RDD[(String,Long,String,String,String,String)] = {
     
-  /**
-   * This is the basic method to extract valuable information from the entries of the W3 log file
-   */
-  def extract(sc:SparkContext,path:String):RDD[(String,Long,String,String,String,String)] = {
-
-    sc.textFile(path).map(line => {
+    rawset.map(line => {
       
       val items = line.split(FIELD_DELIM)
       /*
@@ -62,7 +53,11 @@ object LogExtractor extends Serializable {
       (sessionid,timestamp,userid,items(fieldspec(FIELD_URL)),items(fieldspec(FIELD_TIME)),items(fieldspec(FIELD_REFERRER)))
       
     })
-  
+
   }
- 
+
+  def buildParquet(req:ServiceRequest,rawset:RDD[Map[String,Any]]):RDD[(String,Long,String,String,String,String)] = {
+    null
+  }
+  
 }

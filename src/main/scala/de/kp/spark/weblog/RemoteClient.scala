@@ -1,4 +1,4 @@
-package de.kp.spark.weblog.sample
+package de.kp.spark.weblog
 /* Copyright (c) 2014 Dr. Krusche & Partner PartG
 * 
 * This file is part of the Spark-Weblog project
@@ -18,29 +18,31 @@ package de.kp.spark.weblog.sample
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
-import de.kp.spark.weblog.LogInsight
+import akka.actor.ActorSystem
+import com.typesafe.config.ConfigFactory
 
-object WebLogInsight extends SparkApp {
+import akka.pattern.ask
+import akka.util.Timeout
+
+import scala.concurrent.duration.Duration._
+import scala.concurrent.duration.DurationInt
+
+import scala.concurrent.Future
+
+class RemoteClient(service:String) {
+
+  private val path = "client.conf"    
+  private val conf = ConfigFactory.load(path)
+
+  val listener = Listeners.get(service)
+  implicit val timeout = Timeout(DurationInt(listener.timeout).second)
   
-  def main(args:Array[String]) {
+  private val url = Listeners.get(service)
     
-    val sc = createLocalCtx("WebLogInsight")
-    
-    val path = "/Work/tmp/web-log/"
-    /*
-     * Retrieve all pages from the W3C log file with a rating greater than 1
-     */
-    val pages = LogInsight.fromPages(sc, path + "pages", "select * from pages where rating > 1")  
-    pages .foreach(r => println(r))
+  private val system = ActorSystem(service, conf)
+  private val remote = system.actorSelection(listener.url)
 
-    /*
-     * Retrieve all sessions from the W3C log file with checkout abandonment
-     */
-    val flows = LogInsight.fromFlows(sc, path + "flows", "select * from flows where flowstatus = 1")  
-    flows .foreach(r => println(r))
-
-    sc.stop()
-    
-  }
+  def send(req:Any):Future[Any] = ask(remote, req)    
+  def shutdown() = system.shutdown
 
 }

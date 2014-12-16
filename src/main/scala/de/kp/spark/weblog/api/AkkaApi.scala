@@ -1,4 +1,4 @@
-package de.kp.spark.weblog.akka
+package de.kp.spark.weblog.api
 /* Copyright (c) 2014 Dr. Krusche & Partner PartG
 * 
 * This file is part of the Spark-Weblog project
@@ -18,32 +18,17 @@ package de.kp.spark.weblog.akka
 * If not, see <http://www.gnu.org/licenses/>.
 */
 
+import org.apache.spark.SparkContext
 import akka.actor.{ActorSystem,Props}
-import com.typesafe.config.ConfigFactory
 
-object LogService {
+import de.kp.spark.weblog.actor.WeblogMaster
 
-  def main(args: Array[String]) {
-    
-    val name:String = "weblog-server"
-    val conf:String = "server.conf"
+class AkkaApi(system:ActorSystem,@transient sc:SparkContext) {
 
-    val server = new LogService(conf, name)
-    while (true) {}
-    
-    server.shutdown
-      
+  val master = system.actorOf(Props(new WeblogMaster(sc)), name="weblog-master")
+
+  def start() {
+     while (true) {}   
   }
-
-}
-
-class LogService(conf:String, name:String) {
-
-  val system = ActorSystem(name, ConfigFactory.load(conf))
-  sys.addShutdownHook(system.shutdown)
-
-  val master = system.actorOf(Props[LogMaster], name="log-master")
-
-  def shutdown = system.shutdown()
   
 }

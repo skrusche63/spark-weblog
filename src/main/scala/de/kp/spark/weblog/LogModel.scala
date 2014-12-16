@@ -74,49 +74,6 @@ case class InsightResponse(
   status:String
 )
 
-case class LogFlow(
-  sessid:String,
-  userid:String,
-  total:Int,
-  starttime:Long,
-  timespent:Long,
-  referrer:String,
-  exitpage:String,
-  flowstatus:Int
-)
-
-/**
- * LogPage specifies a certain page url within a user session
- */
-case class LogPage (
-  sessid:String,
-  userid:String,
-  starttime:Long,
-  pageurl:String,
-  visittime:String,
-  referrer:String,
-  timespent:Long,
-  rating:Int
-)
-
-/**
- * LogModel holds utility methods with respect
- * to extracted web log information
- */
-object LogModel {
-    
-  implicit val formats = Serialization.formats(NoTypeHints)
-
-  def serializeFlow(flow:LogFlow):String = write(flow)
-
-  def serializePage(page:LogPage):String = write(page)
-  
-  def deserializeFlow(line:String):LogFlow = read[LogFlow](line)
-  
-  def deserializePage(line:String):LogPage = read[LogPage](line)
-  
-}
-
 object LogStatus {
   
   val SUCCESS = "success"

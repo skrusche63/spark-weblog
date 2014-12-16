@@ -20,13 +20,15 @@ package de.kp.spark.weblog
 
 import org.apache.spark.rdd.RDD
 
+import de.kp.spark.weblog.model._
+
 import de.kp.spark.weblog.Configuration._
 import de.kp.spark.weblog.goal.Goals
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 
-object LogEvaluator extends Serializable {
+class W3LogEvaluator extends Serializable {
 
   /**
    * This method is directly applied to the extraction result (see LogExtactor); 
@@ -36,7 +38,7 @@ object LogEvaluator extends Serializable {
    * 
    * Input: session = (sessionid,timestamp,userid,pageurl,visittime,referrer)
    */
-  def eval1(source:RDD[(String,Long,String,String,String,String)]):RDD[LogPage] = {
+  def logPages(source:RDD[(String,Long,String,String,String,String)]):RDD[LogPage] = {
 
     val sc = source.context
     val ratings = sc.broadcast(Configuration.ratings)
@@ -119,7 +121,7 @@ object LogEvaluator extends Serializable {
      
   }
   /**
-   * This method is directly applied to the extraction result (see LogExtractor); 
+   * This method is directly applied to the extraction result (see W3LogModel); 
    * it specifies another first level aggregation step of raw click data and
    * determines the number of clicks (or page views) within a session, the total
    * time of the session, referrer and exit page, and an indicator to describe
@@ -130,7 +132,7 @@ object LogEvaluator extends Serializable {
    * Input: session = (sessionid,timestamp,userid,pageurl,visittime,referrer)
    * 
    */
-  def eval2(source:RDD[(String,Long,String,String,String,String)]):RDD[LogFlow] = {
+  def logFlows(source:RDD[(String,Long,String,String,String,String)]):RDD[LogFlow] = {
  
     /* Group source by sessionid */
     val dataset = source.groupBy(group => group._1)

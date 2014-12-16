@@ -1,4 +1,4 @@
-package de.kp.spark.weblog.akka
+package de.kp.spark.weblog
 /* Copyright (c) 2014 Dr. Krusche & Partner PartG
 * 
 * This file is part of the Spark-Weblog project
@@ -17,35 +17,39 @@ package de.kp.spark.weblog.akka
 * 
 * If not, see <http://www.gnu.org/licenses/>.
 */
+import scala.concurrent.Future
+import scala.collection.mutable.HashMap
 
-import org.apache.spark.{SparkConf,SparkContext}
-import org.apache.spark.serializer.KryoSerializer
+object RemoteContext {
 
-trait SparkActor {
-  
-  protected def createLocalCtx(name:String, props:Map[String,String]):SparkContext = {
-
-    for (prop <- props) {
-      System.setProperty(prop._1,prop._2)      
+  val clientPool = HashMap.empty[String,RemoteClient]
+ 
+  /**
+   * Send message to remote Akka service
+   */
+  def send(service:String,message:String):Future[Any] = {
+   
+    if (clientPool.contains(service) == false) {
+      clientPool += service -> new RemoteClient(service)      
     }
+   
+    val client = clientPool(service)
+    client.send(message)
+ 
+  }
 
-    val runtime = Runtime.getRuntime()
-	runtime.gc()
-		
-	val cores = runtime.availableProcessors()
-		
-	val conf = new SparkConf()
-	conf.setMaster("local["+cores+"]")
-		
-	conf.setAppName(name);
-    conf.set("spark.serializer", classOf[KryoSerializer].getName)		
-    /* 
-     * Set the Jetty port to 0 to find a random port
-     */
-    conf.set("spark.ui.port", "0")        
-        
-	new SparkContext(conf)
-		
+  /**
+   * Inform all registered listener about a certain situation
+   * and send provided message
+   */
+  def notify(message:String) {
+    
+    val listeners = Listeners.names()
+    
+    for (listener <- listeners) {
+      send(listener,message)
+    }
+    
   }
 
 }
