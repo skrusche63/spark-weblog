@@ -36,9 +36,7 @@ class W3FlowQuestor(@transient sc:SparkContext) extends BaseActor {
 
       val response = try {
       
-        val MDIR = Configuration.MINING_DIR
-        val flowfile = (MDIR + "flows")
-      
+        val flowfile = (Configuration.output(0) + "/flows/" + req.data(Names.REQ_UID))      
         val query = req.data(Names.REQ_QUERY)
         
         val questor = new W3LogQueries(sc)

@@ -24,7 +24,7 @@ import org.apache.spark.rdd.RDD
 import de.kp.spark.weblog.Configuration._
 import de.kp.spark.weblog.model._
 
-class BayesianModel(probabilities:Map[Int,Double]) {
+class BayesianModel(val probabilities:Map[Int,Double]) {
   
   def predict(clicks:Int):Double = {
     

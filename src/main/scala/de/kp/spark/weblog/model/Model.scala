@@ -73,6 +73,10 @@ case class LogPage (
 
 case class LogPages(items:List[LogPage])
 
+case class ClickPrediction(clicks:Int,probability:Double)
+
+case class ClickPredictions(items:List[ClickPrediction])
+
 object FlowStatus {
 
   /*
@@ -95,6 +99,9 @@ object Messages extends BaseMessages {
 object ResponseStatus extends BaseStatus
 
 object Serializer extends BaseSerializer {
+
+  def serializeClickPredictions(predictions:ClickPredictions):String = write(predictions)
+  def deserializeClickPredictions(predictions:String):ClickPredictions = read[ClickPredictions](predictions)
 
   def serializeLogFlows(flows:LogFlows):String = write(flows)
   def deserializeLogFlows(flows:String):LogFlows = read[LogFlows](flows)

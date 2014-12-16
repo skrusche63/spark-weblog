@@ -33,15 +33,28 @@ import de.kp.spark.core.model._
 import de.kp.spark.weblog.{Configuration,BayesianModel}
 import de.kp.spark.weblog.model._
 
-class W3LogSink(@transient sc:SparkContext) {
-
+class W3LogSink(@transient sc:SparkContext) extends Serializable {
+  /**
+   * Bayesian based click-conversion correlations are saved and retrieved
+   * using a Redis instance
+   */
   def getClickModel(req:ServiceRequest):BayesianModel = {
-    // TODO
-    null
+
+    val sink = new RedisSink()
+    val predictions = Serializer.deserializeClickPredictions(sink.model(req))
+    
+    val probabilities = predictions.items.map(entry => (entry.clicks,entry.probability)).toMap
+    new BayesianModel(probabilities)
+  
   }
 
   def saveClickModel(req:ServiceRequest,model:BayesianModel) {
-    // TODO
+    
+    val sink = new RedisSink()
+    val predictions = ClickPredictions(model.probabilities.map(entry => ClickPrediction(entry._1,entry._2)).toList)
+    
+    sink.addModel(req,Serializer.serializeClickPredictions(predictions))
+    
   }
   
   def saveLogFlows(req:ServiceRequest,dataset:RDD[LogFlow]) {
@@ -52,8 +65,7 @@ class W3LogSink(@transient sc:SparkContext) {
         /*
          * Delete file on the file system 
          */
-        val MDIR = Configuration.MINING_DIR
-        val flowfile = (MDIR + "flows")
+        val flowfile = (Configuration.output(0) + "/flows/" + req.data(Names.REQ_UID))
       
         val fs = FileSystem.get(new HadoopConf())      
         fs.delete(new Path(flowfile), true)     
@@ -82,8 +94,7 @@ class W3LogSink(@transient sc:SparkContext) {
         /*
          * Delete file on the file system 
          */
-        val MDIR = Configuration.MINING_DIR
-        val pagefile = (MDIR + "pages")
+        val pagefile = (Configuration.output(0) + "/pages/" + req.data(Names.REQ_UID))
       
         val fs = FileSystem.get(new HadoopConf())      
         fs.delete(new Path(pagefile), true)     

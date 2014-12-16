@@ -56,25 +56,8 @@ object Configuration extends CoreConf {
   val COOKIE_DELIMITER = "cookie.delim"
   
   val FLOW_SEQUENCE = "flow.sequence"
-    
-  val PAGE_RATING = "pagetime.rating"
- 
-  /* Conversion file */
-  private val GOAL_PATH = "path"    
-  /* Mining directory */
-  private val MINING_PATH = "path"
-
-  private val conversionProps = fromConversionCfg()
 
   private val logfileProps = fromLogfileCfg()
-  private val miningProps  = fromMiningCfg()
-
-  private def fromConversionCfg(): Map[String,String] = {
-
-    val cfg = config.getConfig("conversion")
-    Map(GOAL_PATH -> cfg.getString(GOAL_PATH))
-    
-  }
 
   private def fromLogfileCfg(): Map[String,String] = {
   
@@ -94,20 +77,11 @@ object Configuration extends CoreConf {
       FIELD_USERID -> cfg.getString(FIELD_USERID),
       COOKIE_DELIMITER -> cfg.getString(COOKIE_DELIMITER),
       
-      PAGE_RATING -> cfg.getString(PAGE_RATING),
-      
       /*
        * Conversion indicator
        */
       FLOW_SEQUENCE -> cfg.getString(FLOW_SEQUENCE)
     )
-    
-  }
-
-  private def fromMiningCfg(): Map[String,String] = {
-
-    val cfg = config.getConfig("mining")
-    Map(MINING_PATH -> cfg.getString(MINING_PATH))
     
   }
   /*
@@ -138,18 +112,6 @@ object Configuration extends CoreConf {
   
   def USER_ID_NAME = logfileProps(FIELD_USERID)
 
-  /*
-   * Returns a specific XML file on the file system
-   * that describes all conversion goals
-   */
-  def GOAL_FILE = conversionProps(GOAL_PATH)
-
-  /*
-   * Returns the specified directory on the file system
-   * where to read and write mining results
-   */
-  def MINING_DIR = miningProps(MINING_PATH)
-
   override def actor:(Int,Int,Int) = {
   
     val cfg = config.getConfig("actor")
@@ -162,31 +124,24 @@ object Configuration extends CoreConf {
     
   }
 
-  override def elastic:HConf = {
-  
-    val cfg = config.getConfig("elastic")
-    val conf = new HConf()                          
-
-    conf.set("es.nodes",cfg.getString("es.nodes"))
-    conf.set("es.port",cfg.getString("es.port"))
-
-    conf.set("es.resource", cfg.getString("es.resource"))                
-    conf.set("es.query", cfg.getString("es.query"))                          
- 
-    conf
-    
-  }
+  override def elastic:HConf = null
    
   override def input:List[String] = {
   
-    val cfg = config.getConfig("file")
+    val cfg = config.getConfig("input")
     List(cfg.getString("path"))   
     
   }
  
   override def mysql:(String,String,String,String) = null
   
-  override def output:List[String] = null
+  override def output:List[String] = {
+  
+    val cfg = config.getConfig("output")
+    List(cfg.getString("path"))   
+    
+    
+  }
   
   override def redis:(String,String) = {
   
