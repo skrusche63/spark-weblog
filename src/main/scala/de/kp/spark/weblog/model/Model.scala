@@ -121,14 +121,3 @@ object Sinks {
   def isSink(sink:String):Boolean = sinks.contains(sink)
   
 }
-
-object Sources {
-
-  val FILE:String    = "FILE"
-  val PARQUET:String = "PARQUET"    
-    
-  private val sources = List(FILE,PARQUET)  
-  
-  def isSource(source:String):Boolean = sources.contains(source)
-  
-}
