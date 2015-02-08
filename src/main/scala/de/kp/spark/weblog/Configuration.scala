@@ -136,7 +136,9 @@ object Configuration extends CoreConf {
   }
 
   override def elastic:HConf = null
-   
+ 
+  override def hbase:Map[String,String] = null
+  
   override def input:List[String] = {
   
     val cfg = config.getConfig("input")
